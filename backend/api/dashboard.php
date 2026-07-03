@@ -2,59 +2,83 @@
 session_start();
 require_once '../config/db.php';
 require_once '../includes/helpers.php';
+
 authCheck();
 header('Content-Type: application/json');
 
-// Total active factories
-$r = fetchRows($conn, "SELECT COUNT(*) AS CNT FROM FACTORY");
-$total_factories = (int)$r[0]['CNT'];
+$result = [];
 
-// Total active workers
-$r = fetchRows($conn, "SELECT COUNT(*) AS CNT FROM WORKER WHERE status = 'Active'");
-$total_workers = (int)$r[0]['CNT'];
+// Total factories
+$stmt = oci_parse($conn, "SELECT COUNT(*) AS CNT FROM FACTORY");
+oci_execute($stmt);
+$row = oci_fetch_assoc($stmt);
+$result['totalFactories'] = $row['CNT'];
 
-// Total audits
-$r = fetchRows($conn, "SELECT COUNT(*) AS CNT FROM AUDIT_RECORD");
-$total_audits = (int)$r[0]['CNT'];
+// Compliant factories count
+$stmt = oci_parse($conn, "SELECT COUNT(*) AS CNT FROM FACTORY WHERE compliance_status = 'Compliant'");
+oci_execute($stmt);
+$row = oci_fetch_assoc($stmt);
+$result['compliantCount'] = $row['CNT'];
 
-// Open grievances
-$r = fetchRows($conn, "SELECT COUNT(*) AS CNT FROM GRIEVANCE WHERE status = 'Open'");
-$open_grievances = (int)$r[0]['CNT'];
+// At risk factories count
+$stmt = oci_parse($conn, "SELECT COUNT(*) AS CNT FROM FACTORY WHERE compliance_status = 'At Risk'");
+oci_execute($stmt);
+$row = oci_fetch_assoc($stmt);
+$result['atRiskCount'] = $row['CNT'];
 
-// Unacknowledged safety alerts
-$r = fetchRows($conn, "SELECT COUNT(*) AS CNT FROM SAFETY_ALERT WHERE is_acknowledged = 'N'");
-$unack_alerts = (int)$r[0]['CNT'];
+// Non-compliant factories count
+$stmt = oci_parse($conn, "SELECT COUNT(*) AS CNT FROM FACTORY WHERE compliance_status = 'Non-Compliant'");
+oci_execute($stmt);
+$row = oci_fetch_assoc($stmt);
+$result['nonCompliantCount'] = $row['CNT'];
 
-// Compliance breakdown
-$compliance_breakdown = fetchRows($conn,
-  "SELECT compliance_status AS STATUS, COUNT(*) AS CNT FROM FACTORY GROUP BY compliance_status ORDER BY CNT DESC"
-);
+// Open grievances count
+$stmt = oci_parse($conn, "SELECT COUNT(*) AS CNT FROM GRIEVANCE WHERE status = 'Open'");
+oci_execute($stmt);
+$row = oci_fetch_assoc($stmt);
+$result['openGrievances'] = $row['CNT'];
 
-// Recent 5 audits
-$recent_audits = fetchRows($conn,
+// Safety equipment expiring within 30 days count
+$stmt = oci_parse($conn, "SELECT COUNT(*) AS CNT FROM SAFETY_EQUIPMENT WHERE expiry_date BETWEEN SYSDATE AND SYSDATE+30");
+oci_execute($stmt);
+$row = oci_fetch_assoc($stmt);
+$result['equipmentExpiring'] = $row['CNT'];
+
+// Top 5 factories by compliance score (Oracle 11g ROWNUM pattern)
+$result['topFactories'] = fetchRows($conn,
   "SELECT * FROM (
-   SELECT ar.audit_id, f.factory_name, TO_CHAR(ar.audit_date,'DD-Mon-YYYY') AS audit_date,
-   ar.score, ar.result
-   FROM AUDIT_RECORD ar JOIN FACTORY f ON ar.factory_id = f.factory_id
-   ORDER BY ar.audit_date DESC
-  ) WHERE ROWNUM <= 5"
-);
+     SELECT factory_id, factory_name, district, compliance_score, compliance_status 
+     FROM FACTORY ORDER BY compliance_score DESC
+   ) WHERE ROWNUM <= 5");
 
-// Top factories by score
-$top_factories = fetchRows($conn,
+// Last 6 audit scores (Oracle 11g ROWNUM pattern with AUDIT_RECORD table)
+$result['auditTrend'] = fetchRows($conn,
   "SELECT * FROM (
-   SELECT factory_name, compliance_score, compliance_status
-   FROM FACTORY ORDER BY compliance_score DESC
-  ) WHERE ROWNUM <= 5"
-);
+     SELECT TO_CHAR(a.audit_date,'DD-Mon-YY') AS AUDIT_DATE, a.score, f.factory_name
+     FROM AUDIT_RECORD a JOIN FACTORY f ON a.factory_id=f.factory_id
+     WHERE a.score IS NOT NULL ORDER BY a.audit_date DESC
+   ) WHERE ROWNUM <= 6");
 
-jsonResponse(['success' => true, 'data' => [
-  'total_factories'     => $total_factories,
-  'total_workers'       => $total_workers,
-  'total_audits'        => $total_audits,
-  'open_grievances'     => $open_grievances,
-  'unack_alerts'        => $unack_alerts,
-  'compliance_breakdown'=> $compliance_breakdown,
-  'recent_audits'       => $recent_audits,
-  'top_factories'       => $top_factories,
-]]);
+// Compliance distribution count grouped by status
+$result['complianceDistribution'] = fetchRows($conn,
+  "SELECT compliance_status AS STATUS, COUNT(*) AS CNT FROM FACTORY GROUP BY compliance_status");
+
+// Recent activity timeline (Oracle 11g ROWNUM pattern with AUDIT_RECORD table)
+$result['recentActivity'] = fetchRows($conn,
+  "SELECT type, description, event_date FROM (
+     SELECT 'grievance' AS type, 
+            'Grievance #'||g.grievance_id||' moved to '||g.status AS description,
+            TO_CHAR(NVL(g.resolved_date, g.submitted_date),'DD-Mon-YY') AS event_date,
+            NVL(g.resolved_date, g.submitted_date) AS raw_date
+     FROM GRIEVANCE g WHERE ROWNUM <= 4
+     UNION ALL
+     SELECT 'audit' AS type,
+            'Audit for '||f.factory_name||' scored '||a.score AS description,
+            TO_CHAR(a.audit_date,'DD-Mon-YY') AS event_date,
+            a.audit_date AS raw_date
+     FROM AUDIT_RECORD a JOIN FACTORY f ON a.factory_id=f.factory_id
+     WHERE a.score IS NOT NULL AND ROWNUM <= 4
+     ORDER BY raw_date DESC
+   ) WHERE ROWNUM <= 8");
+
+echo json_encode($result);

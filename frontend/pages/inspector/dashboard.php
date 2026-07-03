@@ -1,5 +1,6 @@
 <?php
-require_once '../../backend/includes/auth_check.php';
+require_once '../../../backend/includes/auth_check.php';
+if (!isset($_SESSION["role"]) || $_SESSION["role"] !== "inspector") { header("Location: /frontend/index.html"); exit; }
 $activePage = 'dashboard';
 ?>
 <!DOCTYPE html>
@@ -8,7 +9,7 @@ $activePage = 'dashboard';
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GarmentGuard - Dashboard</title>
-  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../../assets/css/style.css">
 </head>
 <body>
   <div class="app-container">
@@ -17,21 +18,15 @@ $activePage = 'dashboard';
         <span class="brand-title">GarmentGuard</span>
         <span class="brand-subtitle">Compliance System</span>
       </div>
-      <ul class="nav-menu">
+            <ul class="nav-menu">
         <li><a href="dashboard.php" class="nav-link <?php echo $activePage === 'dashboard' ? 'active' : ''; ?>">📊 Dashboard</a></li>
         <li><a href="factories.php" class="nav-link <?php echo $activePage === 'factories' ? 'active' : ''; ?>">🏭 Factories</a></li>
-        <li><a href="workers.php" class="nav-link <?php echo $activePage === 'workers' ? 'active' : ''; ?>">👷 Workers</a></li>
         <li><a href="audits.php" class="nav-link <?php echo $activePage === 'audits' ? 'active' : ''; ?>">📋 Audits</a></li>
-        <li><a href="grievances.php" class="nav-link <?php echo $activePage === 'grievances' ? 'active' : ''; ?>">📣 Grievances</a></li>
-        <li><a href="salary.php" class="nav-link <?php echo $activePage === 'salary' ? 'active' : ''; ?>">💰 Salaries</a></li>
-        <li><a href="certifications.php" class="nav-link <?php echo $activePage === 'certifications' ? 'active' : ''; ?>">🏅 Certifications</a></li>
         <li><a href="equipment.php" class="nav-link <?php echo $activePage === 'equipment' ? 'active' : ''; ?>">🧯 Safety Equipment</a></li>
-        <li><a href="buyer.php" class="nav-link <?php echo $activePage === 'buyer' ? 'active' : ''; ?>">🛒 Buyers</a></li>
         <li><a href="reports.php" class="nav-link <?php echo $activePage === 'reports' ? 'active' : ''; ?>">📈 Reports</a></li>
-        <li><a href="users.php" class="nav-link <?php echo $activePage === 'users' ? 'active' : ''; ?>">👤 Users</a></li>
       </ul>
       <div class="nav-footer">
-        <a href="../../backend/auth/logout.php" class="nav-link">🚪 Logout</a>
+        <a href="../../../backend/auth/logout.php" class="nav-link">🚪 Logout</a>
       </div>
     </div>
 
@@ -79,7 +74,7 @@ $activePage = 'dashboard';
     </div>
   </div>
 
-  <script src="../assets/js/toast.js"></script>
+  <script src="../../assets/js/toast.js"></script>
   <script>
     function badgeClass(val) {
       const map = {

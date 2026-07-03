@@ -5,13 +5,13 @@ require_once '../includes/helpers.php';
 authCheck();
 header('Content-Type: application/json');
 
-// Compliance by division
+// Compliance by district
 $division_stats = fetchRows($conn,
-  "SELECT division,
+  "SELECT district AS division,
    COUNT(*) AS total_factories,
    SUM(CASE WHEN compliance_status = 'Compliant' THEN 1 ELSE 0 END) AS compliant,
    ROUND(AVG(compliance_score), 1) AS avg_score
-   FROM FACTORY GROUP BY division ORDER BY division"
+   FROM FACTORY GROUP BY district ORDER BY district"
 );
 
 // Grievances by category

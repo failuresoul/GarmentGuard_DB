@@ -26,15 +26,15 @@ $_SESSION['full_name'] = $user['FULL_NAME'];
 $_SESSION['factory_id'] = $user['FACTORY_ID'];
 
 $redirects = [
-  'admin' => 'pages/dashboard.php',
-  'compliance_officer' => 'pages/dashboard.php',
-  'inspector' => 'pages/audits.php',
-  'buyer_user' => 'pages/buyer.php',
-  'worker' => 'pages/profile.php'
+  'admin' => 'pages/admin/dashboard.php',
+  'compliance_officer' => 'pages/compliance_officer/dashboard.php',
+  'inspector' => 'pages/inspector/dashboard.php',
+  'buyer_user' => 'pages/buyer/dashboard.php',
+  'worker' => 'pages/worker/profile.php'
 ];
 
 echo json_encode([
   'success' => true,
   'role' => $user['ROLE'],
-  'redirect' => $redirects[$user['ROLE']] ?? 'pages/dashboard.php'
+  'redirect' => $redirects[$user['ROLE']] ?? 'pages/admin/dashboard.php'
 ]);

@@ -1,14 +1,15 @@
 <?php
-require_once '../../backend/includes/auth_check.php';
-$activePage = 'audits';
+require_once '../../../backend/includes/auth_check.php';
+if (!isset($_SESSION["role"]) || $_SESSION["role"] !== "compliance_officer") { header("Location: /frontend/index.html"); exit; }
+$activePage = 'factories';
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GarmentGuard - Audits</title>
-  <link rel="stylesheet" href="../assets/css/style.css">
+  <title>GarmentGuard - Factories</title>
+  <link rel="stylesheet" href="../../assets/css/style.css">
 </head>
 <body>
   <div class="app-container">
@@ -17,7 +18,7 @@ $activePage = 'audits';
         <span class="brand-title">GarmentGuard</span>
         <span class="brand-subtitle">Compliance System</span>
       </div>
-      <ul class="nav-menu">
+            <ul class="nav-menu">
         <li><a href="dashboard.php" class="nav-link <?php echo $activePage === 'dashboard' ? 'active' : ''; ?>">📊 Dashboard</a></li>
         <li><a href="factories.php" class="nav-link <?php echo $activePage === 'factories' ? 'active' : ''; ?>">🏭 Factories</a></li>
         <li><a href="workers.php" class="nav-link <?php echo $activePage === 'workers' ? 'active' : ''; ?>">👷 Workers</a></li>
@@ -28,16 +29,15 @@ $activePage = 'audits';
         <li><a href="equipment.php" class="nav-link <?php echo $activePage === 'equipment' ? 'active' : ''; ?>">🧯 Safety Equipment</a></li>
         <li><a href="buyer.php" class="nav-link <?php echo $activePage === 'buyer' ? 'active' : ''; ?>">🛒 Buyers</a></li>
         <li><a href="reports.php" class="nav-link <?php echo $activePage === 'reports' ? 'active' : ''; ?>">📈 Reports</a></li>
-        <li><a href="users.php" class="nav-link <?php echo $activePage === 'users' ? 'active' : ''; ?>">👤 Users</a></li>
       </ul>
       <div class="nav-footer">
-        <a href="../../backend/auth/logout.php" class="nav-link">🚪 Logout</a>
+        <a href="../../../backend/auth/logout.php" class="nav-link">🚪 Logout</a>
       </div>
     </div>
 
     <div class="main-content">
       <div class="top-bar">
-        <h2 class="page-title">Compliance Audits</h2>
+        <h2 class="page-title">Factories</h2>
         <div class="user-profile-menu">
           <span style="font-weight:500;color:var(--text-secondary);"><?php echo htmlspecialchars($_SESSION['full_name']); ?></span>
           <div class="user-avatar"><?php echo strtoupper(substr($_SESSION['full_name'], 0, 1)); ?></div>
@@ -46,23 +46,25 @@ $activePage = 'audits';
 
       <div class="card">
         <div class="search-bar">
-          <input type="text" class="search-input" id="search" placeholder="Search by factory, result…">
+          <input type="text" class="search-input" id="search" placeholder="Search factories…">
         </div>
         <div class="table-responsive">
-          <table class="table">
+          <table class="table" id="factories-table">
             <thead>
               <tr>
-                <th>Factory</th>
-                <th>Inspector</th>
-                <th>Audit Date</th>
-                <th>Next Scheduled</th>
-                <th>Score</th>
-                <th>Result</th>
-                <th>Findings</th>
+                <th>Factory Name</th>
+                <th>Reg No</th>
+                <th>District</th>
+                
+                <th>Workers</th>
+                <th>Compliance Score</th>
+                <th>Status</th>
+                <th>Last Audit</th>
+                <th>Next Audit</th>
               </tr>
             </thead>
             <tbody id="tbody">
-              <tr><td colspan="7" style="text-align:center;color:var(--text-secondary)">Loading…</td></tr>
+              <tr><td colspan="9" style="text-align:center;color:var(--text-secondary)">Loading…</td></tr>
             </tbody>
           </table>
         </div>
@@ -70,16 +72,18 @@ $activePage = 'audits';
     </div>
   </div>
 
-  <script src="../assets/js/toast.js"></script>
+  <script src="../../assets/js/toast.js"></script>
   <script>
-    function badgeClass(v) { return {'Pass':'badge-green','Fail':'badge-red','Pending':'badge-gray'}[v] || 'badge-gray'; }
+    function badgeClass(v) {
+      return {'Compliant':'badge-green','At Risk':'badge-amber','Non-Compliant':'badge-red','Review Needed':'badge-amber','Pending':'badge-gray'}[v] || 'badge-gray';
+    }
     function scoreColor(s) { return s >= 75 ? 'var(--green)' : s >= 50 ? 'var(--amber)' : 'var(--red)'; }
 
     let allRows = [];
-    fetch('/backend/api/audits.php')
+    fetch('/backend/api/factories.php')
       .then(r => r.json())
       .then(res => {
-        if (!res.success) { showToast('Failed to load audits', 'error'); return; }
+        if (!res.success) { showToast('Failed to load factories', 'error'); return; }
         allRows = res.data;
         render(allRows);
       })
@@ -87,16 +91,26 @@ $activePage = 'audits';
 
     function render(rows) {
       const tbody = document.getElementById('tbody');
-      if (!rows.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No audits found.</td></tr>'; return; }
+      if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="9" class="empty-state">No factories found.</td></tr>';
+        return;
+      }
       tbody.innerHTML = rows.map(r =>
         `<tr>
           <td><strong>${r.FACTORY_NAME}</strong></td>
-          <td>${r.INSPECTOR_NAME}</td>
-          <td>${r.AUDIT_DATE}</td>
-          <td>${r.NEXT_SCHEDULED || '—'}</td>
-          <td><span style="font-weight:700;color:${scoreColor(r.SCORE || 0)}">${r.SCORE != null ? r.SCORE : 'N/A'}</span></td>
-          <td><span class="badge ${badgeClass(r.RESULT)}">${r.RESULT}</span></td>
-          <td style="max-width:240px;font-size:13px;color:var(--text-secondary)">${r.FINDINGS ? r.FINDINGS.substring(0,80)+'…' : '—'}</td>
+          <td>${r.REGISTRATION_NO}</td>
+          <td>${r.DISTRICT}</td>
+          
+          <td>${r.TOTAL_WORKERS}</td>
+          <td>
+            <div class="score-bar-container">
+              <div class="score-bar"><div class="score-bar-fill" style="width:${r.COMPLIANCE_SCORE}%;background:${scoreColor(r.COMPLIANCE_SCORE)}"></div></div>
+              <span style="font-weight:700;color:${scoreColor(r.COMPLIANCE_SCORE)};min-width:36px">${r.COMPLIANCE_SCORE}</span>
+            </div>
+          </td>
+          <td><span class="badge ${badgeClass(r.COMPLIANCE_STATUS)}">${r.COMPLIANCE_STATUS}</span></td>
+          <td>${r.LAST_AUDIT_DATE || '—'}</td>
+          <td>${r.NEXT_AUDIT_DATE || '—'}</td>
         </tr>`
       ).join('');
     }
@@ -105,8 +119,8 @@ $activePage = 'audits';
       const q = this.value.toLowerCase();
       render(allRows.filter(r =>
         r.FACTORY_NAME.toLowerCase().includes(q) ||
-        r.RESULT.toLowerCase().includes(q) ||
-        (r.INSPECTOR_NAME && r.INSPECTOR_NAME.toLowerCase().includes(q))
+        r.DISTRICT.toLowerCase().includes(q) ||
+        r.COMPLIANCE_STATUS.toLowerCase().includes(q)
       ));
     });
   </script>
