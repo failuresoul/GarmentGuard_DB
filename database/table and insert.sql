@@ -200,37 +200,37 @@ INSERT INTO FACTORY (factory_id, factory_name, registration_no, address, distric
 VALUES (10, 'Mymensingh Garments', 'REG-010', 'Valuka, Mymensingh', 'Mymensingh', 'Mymensingh', 3, 'Compliant', 78.50, TO_DATE('2026-05-18', 'YYYY-MM-DD'), TO_DATE('2026-11-18', 'YYYY-MM-DD'), 'Jamil Hossain', '01700000000', 'mymensingh@factory.com');
 
 INSERT INTO USER_ (user_id, username, password_hash, role, full_name, factory_id, email, status)
-VALUES (1, 'admin_user', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uXCNnZG6W', 'admin', 'System Administrator', NULL, 'admin@garmentguard.com', 'Active');
+VALUES (1, 'admin_user', '$2y$10$xfFhvcPZiGZdd0dYG3fAUeFVtwE82/hiD4iQRtVRFhg6lG7x30eYy', 'admin', 'System Administrator', NULL, 'admin@garmentguard.com', 'Active');
 
 INSERT INTO USER_ (user_id, username, password_hash, role, full_name, factory_id, email, status)
-VALUES (2, 'compliance_officer_1', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uXCNnZG6W', 'compliance_officer', 'Rahman Compliance', 1, 'compliance@dhaka.com', 'Active');
+VALUES (2, 'compliance_officer_1', '$2y$10$xfFhvcPZiGZdd0dYG3fAUeFVtwE82/hiD4iQRtVRFhg6lG7x30eYy', 'compliance_officer', 'Rahman Compliance', 1, 'compliance@dhaka.com', 'Active');
 
 INSERT INTO USER_ (user_id, username, password_hash, role, full_name, factory_id, email, status)
-VALUES (3, 'inspector_1', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uXCNnZG6W', 'inspector', 'AUDIT_RECORD Inspector', NULL, 'inspector@garmentguard.com', 'Active');
+VALUES (3, 'inspector_1', '$2y$10$xfFhvcPZiGZdd0dYG3fAUeFVtwE82/hiD4iQRtVRFhg6lG7x30eYy', 'inspector', 'AUDIT_RECORD Inspector', NULL, 'inspector@garmentguard.com', 'Active');
 
 INSERT INTO USER_ (user_id, username, password_hash, role, full_name, factory_id, email, status)
-VALUES (4, 'buyer_user_1', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uXCNnZG6W', 'buyer_user', 'Buyer Representative', NULL, 'buyer@hm.com', 'Active');
+VALUES (4, 'buyer_user_1', '$2y$10$xfFhvcPZiGZdd0dYG3fAUeFVtwE82/hiD4iQRtVRFhg6lG7x30eYy', 'buyer_user', 'Buyer Representative', NULL, 'buyer@hm.com', 'Active');
 
 INSERT INTO USER_ (user_id, username, password_hash, role, full_name, factory_id, email, status)
-VALUES (5, 'worker_user_1', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uXCNnZG6W', 'worker', 'Worker User', 2, 'worker_user@gazipur.com', 'Active');
+VALUES (5, 'worker_user_1', '$2y$10$xfFhvcPZiGZdd0dYG3fAUeFVtwE82/hiD4iQRtVRFhg6lG7x30eYy', 'worker', 'Worker User', 2, 'worker_user@gazipur.com', 'Active');
 
 INSERT INTO USER_ (user_id, username, password_hash, role, full_name, factory_id, email, status)
-VALUES (6, 'compliance_officer_2', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uXCNnZG6W', 'compliance_officer', 'Tanvir Compliance', 5, 'compliance@narayanganj.com', 'Active');
+VALUES (6, 'compliance_officer_2', '$2y$10$xfFhvcPZiGZdd0dYG3fAUeFVtwE82/hiD4iQRtVRFhg6lG7x30eYy', 'compliance_officer', 'Tanvir Compliance', 5, 'compliance@narayanganj.com', 'Active');
 
 INSERT INTO USER_ (user_id, username, password_hash, role, full_name, factory_id, email, status)
-VALUES (7, 'compliance_officer_3', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uXCNnZG6W', 'compliance_officer', 'Kamal Compliance', 6, 'compliance@khulna.com', 'Active');
+VALUES (7, 'compliance_officer_3', '$2y$10$xfFhvcPZiGZdd0dYG3fAUeFVtwE82/hiD4iQRtVRFhg6lG7x30eYy', 'compliance_officer', 'Kamal Compliance', 6, 'compliance@khulna.com', 'Active');
 
 INSERT INTO USER_ (user_id, username, password_hash, role, full_name, factory_id, email, status)
-VALUES (8, 'compliance_officer_4', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uXCNnZG6W', 'compliance_officer', 'Rahim Compliance', 7, 'compliance@rajshahi.com', 'Active');
+VALUES (8, 'compliance_officer_4', '$2y$10$xfFhvcPZiGZdd0dYG3fAUeFVtwE82/hiD4iQRtVRFhg6lG7x30eYy', 'compliance_officer', 'Rahim Compliance', 7, 'compliance@rajshahi.com', 'Active');
 
 INSERT INTO USER_ (user_id, username, password_hash, role, full_name, factory_id, email, status)
-VALUES (9, 'compliance_officer_5', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uXCNnZG6W', 'compliance_officer', 'Siddiq Compliance', 8, 'compliance@barisal.com', 'Active');
+VALUES (9, 'compliance_officer_5', '$2y$10$xfFhvcPZiGZdd0dYG3fAUeFVtwE82/hiD4iQRtVRFhg6lG7x30eYy', 'compliance_officer', 'Siddiq Compliance', 8, 'compliance@barisal.com', 'Active');
 
 INSERT INTO USER_ (user_id, username, password_hash, role, full_name, factory_id, email, status)
-VALUES (10, 'compliance_officer_6', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uXCNnZG6W', 'compliance_officer', 'Mizan Compliance', 9, 'compliance@rangpur.com', 'Active');
+VALUES (10, 'compliance_officer_6', '$2y$10$xfFhvcPZiGZdd0dYG3fAUeFVtwE82/hiD4iQRtVRFhg6lG7x30eYy', 'compliance_officer', 'Mizan Compliance', 9, 'compliance@rangpur.com', 'Active');
 
 INSERT INTO USER_ (user_id, username, password_hash, role, full_name, factory_id, email, status)
-VALUES (11, 'compliance_officer_7', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uXCNnZG6W', 'compliance_officer', 'Jamil Compliance', 10, 'compliance@mymensingh.com', 'Active');
+VALUES (11, 'compliance_officer_7', '$2y$10$xfFhvcPZiGZdd0dYG3fAUeFVtwE82/hiD4iQRtVRFhg6lG7x30eYy', 'compliance_officer', 'Jamil Compliance', 10, 'compliance@mymensingh.com', 'Active');
 
 INSERT INTO WORKER (worker_id, factory_id, full_name, national_id, designation, join_date, base_salary, shift, status, phone, email)
 VALUES (1, 1, 'Abul Kashem', 'NID-10001', 'Sewing Operator', TO_DATE('2024-05-10', 'YYYY-MM-DD'), 12500.00, 'Day', 'Active', '01711111121', 'kashem@factory.com');
@@ -602,3 +602,4 @@ INSERT INTO ERROR_LOG (log_id, proc_name, error_code, error_message, logged_at)
 VALUES (1, 'PROCESS_SALARY', -20001, 'Worker not active', TO_DATE('2026-06-30', 'YYYY-MM-DD'));
 
 COMMIT;
+
