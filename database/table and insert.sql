@@ -5,7 +5,7 @@ DROP TABLE GRIEVANCE_AUDIT_LOG;
 DROP TABLE GRIEVANCE;
 DROP TABLE SAFETY_EQUIPMENT;
 DROP TABLE CERTIFICATION;
-DROP TABLE AUDIT;
+DROP TABLE AUDIT_RECORD;
 DROP TABLE WORKER;
 DROP TABLE USER_;
 DROP TABLE BUYER_FACTORY;
@@ -59,7 +59,7 @@ CREATE TABLE USER_ (
   CONSTRAINT chk_user_role CHECK (role IN ('admin','compliance_officer','inspector','buyer_user','worker'))
 );
 
-CREATE TABLE AUDIT (
+CREATE TABLE AUDIT_RECORD (
   audit_id NUMBER PRIMARY KEY,
   factory_id NUMBER NOT NULL REFERENCES FACTORY(factory_id),
   inspector_id NUMBER REFERENCES USER_(user_id) ON DELETE SET NULL,
@@ -206,7 +206,7 @@ INSERT INTO USER_ (user_id, username, password_hash, role, full_name, factory_id
 VALUES (2, 'compliance_officer_1', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uXCNnZG6W', 'compliance_officer', 'Rahman Compliance', 1, 'compliance@dhaka.com', 'Active');
 
 INSERT INTO USER_ (user_id, username, password_hash, role, full_name, factory_id, email, status)
-VALUES (3, 'inspector_1', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uXCNnZG6W', 'inspector', 'Audit Inspector', NULL, 'inspector@garmentguard.com', 'Active');
+VALUES (3, 'inspector_1', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uXCNnZG6W', 'inspector', 'AUDIT_RECORD Inspector', NULL, 'inspector@garmentguard.com', 'Active');
 
 INSERT INTO USER_ (user_id, username, password_hash, role, full_name, factory_id, email, status)
 VALUES (4, 'buyer_user_1', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uXCNnZG6W', 'buyer_user', 'Buyer Representative', NULL, 'buyer@hm.com', 'Active');
@@ -322,34 +322,34 @@ VALUES (29, 10, 'Fatema Begum', 'NID-10029', 'Line Chief', TO_DATE('2023-12-10',
 INSERT INTO WORKER (worker_id, factory_id, full_name, national_id, designation, join_date, base_salary, shift, status, phone, email)
 VALUES (30, 10, 'Siddique Mia', 'NID-10030', 'Helper', TO_DATE('2025-02-15', 'YYYY-MM-DD'), 10200.00, 'Night', 'Active', '01700000123', 'siddique@factory.com');
 
-INSERT INTO AUDIT (audit_id, factory_id, inspector_id, audit_date, next_scheduled, score, result, findings, recommendations)
+INSERT INTO AUDIT_RECORD (audit_id, factory_id, inspector_id, audit_date, next_scheduled, score, result, findings, recommendations)
 VALUES (1, 1, 3, TO_DATE('2026-01-15', 'YYYY-MM-DD'), TO_DATE('2026-07-15', 'YYYY-MM-DD'), 88.00, 'Pass', 'Good working conditions, minor safety issues resolved.', 'Maintain current standards.');
 
-INSERT INTO AUDIT (audit_id, factory_id, inspector_id, audit_date, next_scheduled, score, result, findings, recommendations)
+INSERT INTO AUDIT_RECORD (audit_id, factory_id, inspector_id, audit_date, next_scheduled, score, result, findings, recommendations)
 VALUES (2, 2, 3, TO_DATE('2026-02-10', 'YYYY-MM-DD'), TO_DATE('2026-08-10', 'YYYY-MM-DD'), 62.00, 'Pass', 'Some exits blocked, fire extinguishers need service.', 'Clear exits and service all safety equipment.');
 
-INSERT INTO AUDIT (audit_id, factory_id, inspector_id, audit_date, next_scheduled, score, result, findings, recommendations)
-VALUES (3, 3, 3, TO_DATE('2026-03-05', 'YYYY-MM-DD'), TO_DATE('2026-06-05', 'YYYY-MM-DD'), 38.00, 'Fail', 'Multiple safety violations, no fire drill logs, structural concerns.', 'Conduct immediate repairs, perform fire drills, and re-audit.');
+INSERT INTO AUDIT_RECORD (audit_id, factory_id, inspector_id, audit_date, next_scheduled, score, result, findings, recommendations)
+VALUES (3, 3, 3, TO_DATE('2026-03-05', 'YYYY-MM-DD'), TO_DATE('2026-06-05', 'YYYY-MM-DD'), 38.00, 'Fail', 'Multiple safety violations, no fire drill logs, structural concerns.', 'Conduct immediate repairs, perform fire drills, and re-AUDIT_RECORD.');
 
-INSERT INTO AUDIT (audit_id, factory_id, inspector_id, audit_date, next_scheduled, score, result, findings, recommendations)
+INSERT INTO AUDIT_RECORD (audit_id, factory_id, inspector_id, audit_date, next_scheduled, score, result, findings, recommendations)
 VALUES (4, 4, 3, TO_DATE('2026-04-12', 'YYYY-MM-DD'), TO_DATE('2026-10-12', 'YYYY-MM-DD'), 75.00, 'Pass', 'Satisfactory compliance, minor ventilation issues.', 'Improve ventilation in the cutting area.');
 
-INSERT INTO AUDIT (audit_id, factory_id, inspector_id, audit_date, next_scheduled, score, result, findings, recommendations)
+INSERT INTO AUDIT_RECORD (audit_id, factory_id, inspector_id, audit_date, next_scheduled, score, result, findings, recommendations)
 VALUES (5, 5, 3, TO_DATE('2026-02-15', 'YYYY-MM-DD'), TO_DATE('2026-08-15', 'YYYY-MM-DD'), 90.00, 'Pass', 'Excellent structural safety, well-maintained facilities.', 'Keep up the good performance.');
 
-INSERT INTO AUDIT (audit_id, factory_id, inspector_id, audit_date, next_scheduled, score, result, findings, recommendations)
+INSERT INTO AUDIT_RECORD (audit_id, factory_id, inspector_id, audit_date, next_scheduled, score, result, findings, recommendations)
 VALUES (6, 6, 3, TO_DATE('2026-03-20', 'YYYY-MM-DD'), TO_DATE('2026-09-20', 'YYYY-MM-DD'), 55.00, 'Fail', 'Exits partially blocked, structural cracks detected.', 'Remediate building structural cracks immediately.');
 
-INSERT INTO AUDIT (audit_id, factory_id, inspector_id, audit_date, next_scheduled, score, result, findings, recommendations)
+INSERT INTO AUDIT_RECORD (audit_id, factory_id, inspector_id, audit_date, next_scheduled, score, result, findings, recommendations)
 VALUES (7, 7, 3, TO_DATE('2026-04-05', 'YYYY-MM-DD'), TO_DATE('2026-10-05', 'YYYY-MM-DD'), 82.00, 'Pass', 'Good health standards, sound working hours.', 'Improve lighting in sewing section.');
 
-INSERT INTO AUDIT (audit_id, factory_id, inspector_id, audit_date, next_scheduled, score, result, findings, recommendations)
-VALUES (8, 8, 3, TO_DATE('2026-05-01', 'YYYY-MM-DD'), TO_DATE('2026-08-01', 'YYYY-MM-DD'), NULL, 'Pending', 'Initial audit scheduled but not fully completed due to setup delay.', 'Reschedule and finalize audit.');
+INSERT INTO AUDIT_RECORD (audit_id, factory_id, inspector_id, audit_date, next_scheduled, score, result, findings, recommendations)
+VALUES (8, 8, 3, TO_DATE('2026-05-01', 'YYYY-MM-DD'), TO_DATE('2026-08-01', 'YYYY-MM-DD'), NULL, 'Pending', 'Initial AUDIT_RECORD scheduled but not fully completed due to setup delay.', 'Reschedule and finalize AUDIT_RECORD.');
 
-INSERT INTO AUDIT (audit_id, factory_id, inspector_id, audit_date, next_scheduled, score, result, findings, recommendations)
+INSERT INTO AUDIT_RECORD (audit_id, factory_id, inspector_id, audit_date, next_scheduled, score, result, findings, recommendations)
 VALUES (9, 9, 3, TO_DATE('2026-01-10', 'YYYY-MM-DD'), TO_DATE('2026-07-10', 'YYYY-MM-DD'), 68.00, 'Pass', 'Electrical wiring exposed in packing area.', 'Secure all electrical wiring and panels.');
 
-INSERT INTO AUDIT (audit_id, factory_id, inspector_id, audit_date, next_scheduled, score, result, findings, recommendations)
+INSERT INTO AUDIT_RECORD (audit_id, factory_id, inspector_id, audit_date, next_scheduled, score, result, findings, recommendations)
 VALUES (10, 10, 3, TO_DATE('2026-05-18', 'YYYY-MM-DD'), TO_DATE('2026-11-18', 'YYYY-MM-DD'), 78.50, 'Pass', 'Satisfactory overall conditions.', 'Increase first aid training sessions.');
 
 INSERT INTO BUYER (buyer_id, buyer_name, country, contact_name, email, phone, brand_name)
