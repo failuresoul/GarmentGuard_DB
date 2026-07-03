@@ -24,7 +24,7 @@ BEFORE UPDATE OF status ON GRIEVANCE
 FOR EACH ROW
 BEGIN
   INSERT INTO GRIEVANCE_AUDIT_LOG(log_id, grievance_id, old_status, new_status, changed_by, changed_at)
-  VALUES((SELECT NVL(MAX(log_id),0)+1 FROM GRIEVANCE_AUDIT_LOG),
+  VALUES(seq_grievance_log_id.NEXTVAL,
     :NEW.grievance_id, :OLD.status, :NEW.status,
     SYS_CONTEXT('USERENV','SESSION_USER'), SYSDATE);
   IF :NEW.status = 'Resolved' THEN
@@ -44,7 +44,7 @@ END;
 /
 
 CREATE OR REPLACE TRIGGER trg_audit_score_update
-FOR UPDATE OF score ON AUDIT
+FOR UPDATE OF score ON AUDIT_RECORD
 COMPOUND TRIGGER
   TYPE t_factories IS TABLE OF FACTORY.factory_id%TYPE;
   v_factories t_factories := t_factories();

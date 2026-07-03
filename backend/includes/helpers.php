@@ -31,7 +31,7 @@ function fetchRows($conn, $sql, $binds = []) {
   oci_execute($stmt);
   $rows = [];
   while ($row = oci_fetch_assoc($stmt)) {
-    // Convert OCI LOB objects (CLOB/BLOB) to strings
+    
     foreach ($row as $k => $v) {
       if (is_object($v) && method_exists($v, 'load')) {
         $row[$k] = $v->load();

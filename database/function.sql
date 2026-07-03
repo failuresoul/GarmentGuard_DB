@@ -6,24 +6,24 @@ RETURN NUMBER AS
   v_s2 NUMBER := 0;
   v_s3 NUMBER := 0;
 BEGIN
-  SELECT COUNT(*) INTO v_count FROM AUDIT WHERE factory_id = p_factory_id AND score IS NOT NULL;
+  SELECT COUNT(*) INTO v_count FROM AUDIT_RECORD WHERE factory_id = p_factory_id AND score IS NOT NULL;
   IF v_count = 0 THEN RETURN 0; END IF;
   IF v_count >= 1 THEN
     SELECT score INTO v_s1 FROM (
       SELECT score, ROW_NUMBER() OVER (ORDER BY audit_date DESC) as rn
-      FROM AUDIT WHERE factory_id = p_factory_id AND score IS NOT NULL
+      FROM AUDIT_RECORD WHERE factory_id = p_factory_id AND score IS NOT NULL
     ) WHERE rn = 1;
   END IF;
   IF v_count >= 2 THEN
     SELECT score INTO v_s2 FROM (
       SELECT score, ROW_NUMBER() OVER (ORDER BY audit_date DESC) as rn
-      FROM AUDIT WHERE factory_id = p_factory_id AND score IS NOT NULL
+      FROM AUDIT_RECORD WHERE factory_id = p_factory_id AND score IS NOT NULL
     ) WHERE rn = 2;
   END IF;
   IF v_count >= 3 THEN
     SELECT score INTO v_s3 FROM (
       SELECT score, ROW_NUMBER() OVER (ORDER BY audit_date DESC) as rn
-      FROM AUDIT WHERE factory_id = p_factory_id AND score IS NOT NULL
+      FROM AUDIT_RECORD WHERE factory_id = p_factory_id AND score IS NOT NULL
     ) WHERE rn = 3;
   END IF;
   IF v_count = 1 THEN v_score := v_s1;

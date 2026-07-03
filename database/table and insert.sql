@@ -1,3 +1,16 @@
+DROP SEQUENCE seq_factory_id;
+DROP SEQUENCE seq_worker_id;
+DROP SEQUENCE seq_user_id;
+DROP SEQUENCE seq_audit_id;
+DROP SEQUENCE seq_cert_id;
+DROP SEQUENCE seq_equipment_id;
+DROP SEQUENCE seq_grievance_id;
+DROP SEQUENCE seq_grievance_log_id;
+DROP SEQUENCE seq_salary_record_id;
+DROP SEQUENCE seq_buyer_id;
+DROP SEQUENCE seq_alert_id;
+DROP SEQUENCE seq_error_log_id;
+
 DROP TABLE SAFETY_ALERT;
 DROP TABLE ERROR_LOG;
 DROP TABLE SALARY_RECORD;
@@ -168,6 +181,22 @@ CREATE TABLE ERROR_LOG (
   error_message VARCHAR2(500),
   logged_at DATE DEFAULT SYSDATE
 );
+
+
+
+
+CREATE SEQUENCE seq_factory_id START WITH 11 INCREMENT BY 1;
+CREATE SEQUENCE seq_worker_id START WITH 31 INCREMENT BY 1;
+CREATE SEQUENCE seq_user_id START WITH 12 INCREMENT BY 1;
+CREATE SEQUENCE seq_audit_id START WITH 11 INCREMENT BY 1;
+CREATE SEQUENCE seq_cert_id START WITH 11 INCREMENT BY 1;
+CREATE SEQUENCE seq_equipment_id START WITH 13 INCREMENT BY 1;
+CREATE SEQUENCE seq_grievance_id START WITH 9 INCREMENT BY 1;
+CREATE SEQUENCE seq_grievance_log_id START WITH 7 INCREMENT BY 1;
+CREATE SEQUENCE seq_salary_record_id START WITH 27 INCREMENT BY 1;
+CREATE SEQUENCE seq_buyer_id START WITH 6 INCREMENT BY 1;
+CREATE SEQUENCE seq_alert_id START WITH 6 INCREMENT BY 1;
+CREATE SEQUENCE seq_error_log_id START WITH 2 INCREMENT BY 1;
 
 INSERT INTO FACTORY (factory_id, factory_name, registration_no, address, district, division, total_workers, compliance_status, compliance_score, last_audit_date, next_audit_date, contact_person, phone, email)
 VALUES (1, 'Dhaka Garments Ltd.', 'REG-001', 'Mirpur, Dhaka', 'Dhaka', 'Dhaka', 3, 'Compliant', 88.00, TO_DATE('2026-01-15', 'YYYY-MM-DD'), TO_DATE('2026-07-15', 'YYYY-MM-DD'), 'Rahim Uddin', '01711111111', 'dhaka@factory.com');

@@ -5,7 +5,7 @@ require_once '../includes/helpers.php';
 authCheck();
 header('Content-Type: application/json');
 
-// Compliance by district
+
 $division_stats = fetchRows($conn,
   "SELECT district AS division,
    COUNT(*) AS total_factories,
@@ -14,7 +14,7 @@ $division_stats = fetchRows($conn,
    FROM FACTORY GROUP BY district ORDER BY district"
 );
 
-// Grievances by category
+
 $grievance_stats = fetchRows($conn,
   "SELECT category, COUNT(*) AS total,
    SUM(CASE WHEN status = 'Resolved' THEN 1 ELSE 0 END) AS resolved,
@@ -22,7 +22,7 @@ $grievance_stats = fetchRows($conn,
    FROM GRIEVANCE GROUP BY category ORDER BY total DESC"
 );
 
-// Salary totals by factory
+
 $salary_stats = fetchRows($conn,
   "SELECT f.factory_name,
    SUM(sr.net_salary) AS total_net,
@@ -34,7 +34,7 @@ $salary_stats = fetchRows($conn,
    GROUP BY f.factory_name ORDER BY total_net DESC"
 );
 
-// Audit pass/fail summary
+
 $audit_stats = fetchRows($conn,
   "SELECT result, COUNT(*) AS cnt FROM AUDIT_RECORD GROUP BY result ORDER BY cnt DESC"
 );

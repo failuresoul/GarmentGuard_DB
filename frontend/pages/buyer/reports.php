@@ -94,7 +94,7 @@ $activePage = 'reports';
         if (!res.success) { showToast('Failed to load reports', 'error'); return; }
         const d = res.data;
 
-        // Division compliance
+        
         document.getElementById('division-tbody').innerHTML = d.division_stats.map(r =>
           `<tr>
             <td>${r.DIVISION}</td>
@@ -104,7 +104,7 @@ $activePage = 'reports';
           </tr>`
         ).join('');
 
-        // Audit summary
+        
         document.getElementById('audit-summary').innerHTML = d.audit_stats.map(r =>
           `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border-color)">
             <span class="badge ${auditColors[r.RESULT] || 'badge-gray'}">${r.RESULT}</span>
@@ -112,7 +112,7 @@ $activePage = 'reports';
           </div>`
         ).join('');
 
-        // Grievances by category
+        
         document.getElementById('grievance-tbody').innerHTML = d.grievance_stats.map(r =>
           `<tr>
             <td><span class="badge badge-blue">${r.CATEGORY}</span></td>
@@ -122,7 +122,7 @@ $activePage = 'reports';
           </tr>`
         ).join('');
 
-        // Salary by factory
+        
         document.getElementById('salary-tbody').innerHTML = d.salary_stats.map(r =>
           `<tr>
             <td>${r.FACTORY_NAME}</td>

@@ -108,7 +108,7 @@ $activePage = 'dashboard';
         document.getElementById('stat-grievances').textContent  = d.open_grievances;
         document.getElementById('stat-alerts').textContent      = d.unack_alerts;
 
-        // Compliance breakdown
+        
         const cb = document.getElementById('compliance-breakdown');
         cb.innerHTML = d.compliance_breakdown.map(r =>
           `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border-color)">
@@ -117,7 +117,7 @@ $activePage = 'dashboard';
           </div>`
         ).join('');
 
-        // Top factories
+        
         const tf = document.getElementById('top-factories');
         tf.innerHTML = d.top_factories.map(r =>
           `<div style="margin-bottom:14px">
@@ -129,7 +129,7 @@ $activePage = 'dashboard';
           </div>`
         ).join('');
 
-        // Recent audits
+        
         const tbody = document.getElementById('recent-audits-body');
         tbody.innerHTML = d.recent_audits.map(r =>
           `<tr>

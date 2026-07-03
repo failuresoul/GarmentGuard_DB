@@ -150,7 +150,7 @@ $activePage = 'dashboard';
           document.getElementById('card-open-grievances').textContent = res.openGrievances || '0';
           document.getElementById('card-equipment-expiring').textContent = res.equipmentExpiring || '0';
 
-          // Donut Chart
+          
           const donutCtx = document.getElementById('compliance-donut-chart').getContext('2d');
           const complCount = parseInt(res.compliantCount || 0);
           const riskCount = parseInt(res.atRiskCount || 0);
@@ -165,7 +165,7 @@ $activePage = 'dashboard';
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#94A3B8', font: { family: 'Outfit', size: 12 } } } } }
           });
 
-          // Line Chart
+          
           const lineCtx = document.getElementById('audit-trend-line-chart').getContext('2d');
           const trendData = [...(res.auditTrend || [])].reverse();
           const labels = trendData.map(a => a.AUDIT_DATE);
@@ -191,12 +191,12 @@ $activePage = 'dashboard';
             }]
           });
 
-          // Top Factories Table
+          
           const topBody = document.getElementById('top-factories-tbody');
           if (res.topFactories && res.topFactories.length > 0) {
             topBody.innerHTML = res.topFactories.map((f, i) => `
               <tr class="clickable-row" onclick="window.location.href='factory_detail.php?id=${f.FACTORY_ID}'">
-                <td><strong>#${i+1}</strong></td>
+                <td><strong>
                 <td><strong>${f.FACTORY_NAME}</strong></td>
                 <td>${f.DISTRICT}</td>
                 <td>
@@ -211,7 +211,7 @@ $activePage = 'dashboard';
             topBody.innerHTML = '<tr><td colspan="5" class="empty-state">No factory records found.</td></tr>';
           }
 
-          // Recent Activity Table
+          
           const actBody = document.getElementById('recent-activity-tbody');
           if (res.recentActivity && res.recentActivity.length > 0) {
             actBody.innerHTML = res.recentActivity.map(item => `

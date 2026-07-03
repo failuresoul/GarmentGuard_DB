@@ -19,7 +19,7 @@ BEGIN
 EXCEPTION
   WHEN OTHERS THEN
     INSERT INTO ERROR_LOG(log_id, proc_name, error_code, error_message, logged_at)
-    VALUES((SELECT NVL(MAX(log_id),0)+1 FROM ERROR_LOG), 'sp_register_factory', SQLCODE, SQLERRM, SYSDATE);
+    VALUES(seq_error_log_id.NEXTVAL, 'sp_register_factory', SQLCODE, SQLERRM, SYSDATE);
     COMMIT;
     RAISE;
 END;
@@ -51,7 +51,7 @@ BEGIN
 EXCEPTION
   WHEN OTHERS THEN
     INSERT INTO ERROR_LOG(log_id, proc_name, error_code, error_message, logged_at)
-    VALUES((SELECT NVL(MAX(log_id),0)+1 FROM ERROR_LOG), 'sp_hire_worker', SQLCODE, SQLERRM, SYSDATE);
+    VALUES(seq_error_log_id.NEXTVAL, 'sp_hire_worker', SQLCODE, SQLERRM, SYSDATE);
     COMMIT;
     RAISE;
 END;
@@ -70,7 +70,7 @@ BEGIN
 EXCEPTION
   WHEN OTHERS THEN
     INSERT INTO ERROR_LOG(log_id, proc_name, error_code, error_message, logged_at)
-    VALUES((SELECT NVL(MAX(log_id),0)+1 FROM ERROR_LOG), 'sp_submit_grievance', SQLCODE, SQLERRM, SYSDATE);
+    VALUES(seq_error_log_id.NEXTVAL, 'sp_submit_grievance', SQLCODE, SQLERRM, SYSDATE);
     COMMIT;
     RAISE;
 END;
@@ -108,7 +108,7 @@ BEGIN
 EXCEPTION
   WHEN OTHERS THEN
     INSERT INTO ERROR_LOG(log_id, proc_name, error_code, error_message, logged_at)
-    VALUES((SELECT NVL(MAX(log_id),0)+1 FROM ERROR_LOG), 'sp_process_salary', SQLCODE, SQLERRM, SYSDATE);
+    VALUES(seq_error_log_id.NEXTVAL, 'sp_process_salary', SQLCODE, SQLERRM, SYSDATE);
     COMMIT;
     RAISE;
 END;
@@ -123,20 +123,20 @@ CREATE OR REPLACE PROCEDURE sp_schedule_audit(
 ) AS
   v_count NUMBER;
 BEGIN
-  SELECT COUNT(*) INTO v_count FROM AUDIT
+  SELECT COUNT(*) INTO v_count FROM AUDIT_RECORD
   WHERE factory_id = p_factory_id
   AND EXTRACT(MONTH FROM audit_date) = EXTRACT(MONTH FROM p_audit_date)
   AND EXTRACT(YEAR FROM audit_date) = EXTRACT(YEAR FROM p_audit_date);
   IF v_count > 0 THEN
     RAISE_APPLICATION_ERROR(-20004, 'Audit already scheduled for this factory this month.');
   END IF;
-  INSERT INTO AUDIT(audit_id, factory_id, inspector_id, audit_date, next_scheduled, result)
+  INSERT INTO AUDIT_RECORD(audit_id, factory_id, inspector_id, audit_date, next_scheduled, result)
   VALUES(p_audit_id, p_factory_id, p_inspector_id, p_audit_date, p_next_scheduled, 'Pending');
   COMMIT;
 EXCEPTION
   WHEN OTHERS THEN
     INSERT INTO ERROR_LOG(log_id, proc_name, error_code, error_message, logged_at)
-    VALUES((SELECT NVL(MAX(log_id),0)+1 FROM ERROR_LOG), 'sp_schedule_audit', SQLCODE, SQLERRM, SYSDATE);
+    VALUES(seq_error_log_id.NEXTVAL, 'sp_schedule_audit', SQLCODE, SQLERRM, SYSDATE);
     COMMIT;
     RAISE;
 END;
@@ -152,7 +152,7 @@ CREATE OR REPLACE PROCEDURE sp_record_audit_score(
   v_factory_id NUMBER;
   v_status VARCHAR2(20);
 BEGIN
-  SELECT factory_id INTO v_factory_id FROM AUDIT WHERE audit_id = p_audit_id;
+  SELECT factory_id INTO v_factory_id FROM AUDIT_RECORD WHERE audit_id = p_audit_id;
   IF p_score >= 75 THEN
     v_status := 'Compliant';
   ELSIF p_score >= 40 THEN
@@ -160,7 +160,7 @@ BEGIN
   ELSE
     v_status := 'Non-Compliant';
   END IF;
-  UPDATE AUDIT SET score = p_score, result = p_result,
+  UPDATE AUDIT_RECORD SET score = p_score, result = p_result,
     findings = p_findings, recommendations = p_recommendations
   WHERE audit_id = p_audit_id;
   UPDATE FACTORY SET compliance_score = p_score, compliance_status = v_status,
@@ -170,7 +170,7 @@ BEGIN
 EXCEPTION
   WHEN OTHERS THEN
     INSERT INTO ERROR_LOG(log_id, proc_name, error_code, error_message, logged_at)
-    VALUES((SELECT NVL(MAX(log_id),0)+1 FROM ERROR_LOG), 'sp_record_audit_score', SQLCODE, SQLERRM, SYSDATE);
+    VALUES(seq_error_log_id.NEXTVAL, 'sp_record_audit_score', SQLCODE, SQLERRM, SYSDATE);
     COMMIT;
     RAISE;
 END;
