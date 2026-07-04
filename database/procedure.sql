@@ -18,9 +18,7 @@ BEGIN
   COMMIT;
 EXCEPTION
   WHEN OTHERS THEN
-    INSERT INTO ERROR_LOG(log_id, proc_name, error_code, error_message, logged_at)
-    VALUES(seq_error_log_id.NEXTVAL, 'sp_register_factory', SQLCODE, SQLERRM, SYSDATE);
-    COMMIT;
+    ROLLBACK;
     RAISE;
 END;
 /
@@ -50,9 +48,7 @@ BEGIN
   COMMIT;
 EXCEPTION
   WHEN OTHERS THEN
-    INSERT INTO ERROR_LOG(log_id, proc_name, error_code, error_message, logged_at)
-    VALUES(seq_error_log_id.NEXTVAL, 'sp_hire_worker', SQLCODE, SQLERRM, SYSDATE);
-    COMMIT;
+    ROLLBACK;
     RAISE;
 END;
 /
@@ -69,9 +65,7 @@ BEGIN
   COMMIT;
 EXCEPTION
   WHEN OTHERS THEN
-    INSERT INTO ERROR_LOG(log_id, proc_name, error_code, error_message, logged_at)
-    VALUES(seq_error_log_id.NEXTVAL, 'sp_submit_grievance', SQLCODE, SQLERRM, SYSDATE);
-    COMMIT;
+    ROLLBACK;
     RAISE;
 END;
 /
@@ -107,9 +101,7 @@ BEGIN
   COMMIT;
 EXCEPTION
   WHEN OTHERS THEN
-    INSERT INTO ERROR_LOG(log_id, proc_name, error_code, error_message, logged_at)
-    VALUES(seq_error_log_id.NEXTVAL, 'sp_process_salary', SQLCODE, SQLERRM, SYSDATE);
-    COMMIT;
+    ROLLBACK;
     RAISE;
 END;
 /
@@ -135,9 +127,7 @@ BEGIN
   COMMIT;
 EXCEPTION
   WHEN OTHERS THEN
-    INSERT INTO ERROR_LOG(log_id, proc_name, error_code, error_message, logged_at)
-    VALUES(seq_error_log_id.NEXTVAL, 'sp_schedule_audit', SQLCODE, SQLERRM, SYSDATE);
-    COMMIT;
+    ROLLBACK;
     RAISE;
 END;
 /
@@ -169,9 +159,7 @@ BEGIN
   COMMIT;
 EXCEPTION
   WHEN OTHERS THEN
-    INSERT INTO ERROR_LOG(log_id, proc_name, error_code, error_message, logged_at)
-    VALUES(seq_error_log_id.NEXTVAL, 'sp_record_audit_score', SQLCODE, SQLERRM, SYSDATE);
-    COMMIT;
+    ROLLBACK;
     RAISE;
 END;
 /

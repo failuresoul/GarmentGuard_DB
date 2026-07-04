@@ -9,10 +9,8 @@ DROP SEQUENCE seq_grievance_log_id;
 DROP SEQUENCE seq_salary_record_id;
 DROP SEQUENCE seq_buyer_id;
 DROP SEQUENCE seq_alert_id;
-DROP SEQUENCE seq_error_log_id;
 
 DROP TABLE SAFETY_ALERT;
-DROP TABLE ERROR_LOG;
 DROP TABLE SALARY_RECORD;
 DROP TABLE GRIEVANCE_AUDIT_LOG;
 DROP TABLE GRIEVANCE;
@@ -174,15 +172,6 @@ CREATE TABLE SAFETY_ALERT (
   is_acknowledged CHAR(1) DEFAULT 'N'
 );
 
-CREATE TABLE ERROR_LOG (
-  log_id NUMBER PRIMARY KEY,
-  proc_name VARCHAR2(100),
-  error_code NUMBER,
-  error_message VARCHAR2(500),
-  logged_at DATE DEFAULT SYSDATE
-);
-
-
 
 
 CREATE SEQUENCE seq_factory_id START WITH 11 INCREMENT BY 1;
@@ -196,7 +185,6 @@ CREATE SEQUENCE seq_grievance_log_id START WITH 7 INCREMENT BY 1;
 CREATE SEQUENCE seq_salary_record_id START WITH 27 INCREMENT BY 1;
 CREATE SEQUENCE seq_buyer_id START WITH 6 INCREMENT BY 1;
 CREATE SEQUENCE seq_alert_id START WITH 6 INCREMENT BY 1;
-CREATE SEQUENCE seq_error_log_id START WITH 2 INCREMENT BY 1;
 
 INSERT INTO FACTORY (factory_id, factory_name, registration_no, address, district, division, total_workers, compliance_status, compliance_score, last_audit_date, next_audit_date, contact_person, phone, email)
 VALUES (1, 'Dhaka Garments Ltd.', 'REG-001', 'Mirpur, Dhaka', 'Dhaka', 'Dhaka', 3, 'Compliant', 88.00, TO_DATE('2026-01-15', 'YYYY-MM-DD'), TO_DATE('2026-07-15', 'YYYY-MM-DD'), 'Rahim Uddin', '01711111111', 'dhaka@factory.com');
@@ -627,8 +615,6 @@ VALUES (4, 6, 8, 'Equipment Expiry', TO_DATE('2026-07-03', 'YYYY-MM-DD'), 'N');
 INSERT INTO SAFETY_ALERT (alert_id, factory_id, equipment_id, alert_type, alert_date, is_acknowledged)
 VALUES (5, 7, 9, 'Equipment Expiry', TO_DATE('2026-07-03', 'YYYY-MM-DD'), 'N');
 
-INSERT INTO ERROR_LOG (log_id, proc_name, error_code, error_message, logged_at)
-VALUES (1, 'PROCESS_SALARY', -20001, 'Worker not active', TO_DATE('2026-06-30', 'YYYY-MM-DD'));
 
 COMMIT;
 
