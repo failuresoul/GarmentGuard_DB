@@ -461,10 +461,21 @@ if ($role === 'admin') {
       return map[status] || 'badge-gray';
     }
 
-    // Sorting Helper
+    // Parse Oracle DD-Mon-YYYY date string (e.g. "15-Jan-2026") to a Date for sorting
     function parseDate(dateStr) {
       if (!dateStr || dateStr === '—') return new Date(0);
-      return new Date(dateStr);
+      const months = { Jan:0, Feb:1, Mar:2, Apr:3, May:4, Jun:5,
+                       Jul:6, Aug:7, Sep:8, Oct:9, Nov:10, Dec:11 };
+      const parts = String(dateStr).split('-');
+      if (parts.length === 3) {
+        const day   = parseInt(parts[0], 10);
+        const month = months[parts[1]];
+        const year  = parseInt(parts[2], 10);
+        if (!isNaN(day) && month !== undefined && !isNaN(year)) {
+          return new Date(year, month, day);
+        }
+      }
+      return new Date(0);
     }
 
     function sortData(data) {

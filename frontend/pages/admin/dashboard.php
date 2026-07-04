@@ -194,19 +194,23 @@ $activePage = 'dashboard';
           
           const topBody = document.getElementById('top-factories-tbody');
           if (res.topFactories && res.topFactories.length > 0) {
-            topBody.innerHTML = res.topFactories.map((f, i) => `
+            topBody.innerHTML = res.topFactories.map((f, i) => {
+              const score = parseFloat(f.COMPLIANCE_SCORE) || 0;
+              const color = scoreColor(score);
+              return `
               <tr class="clickable-row" onclick="window.location.href='factory_detail.php?id=${f.FACTORY_ID}'">
-                <td><strong>
+                <td style="font-weight:700;color:var(--text-secondary);text-align:center;">${i + 1}</td>
                 <td><strong>${f.FACTORY_NAME}</strong></td>
                 <td>${f.DISTRICT}</td>
                 <td>
-                  <div class="score-bar-container">
-                    <div class="score-bar"><div class="score-bar-fill" style="width:${f.COMPLIANCE_SCORE}%;background:${scoreColor(f.COMPLIANCE_SCORE)};"></div></div>
-                    <span style="font-weight:700;color:${scoreColor(f.COMPLIANCE_SCORE)};min-width:32px;text-align:right">${f.COMPLIANCE_SCORE}%</span>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <span style="width:9px;height:9px;border-radius:50%;background:${color};display:inline-block;flex-shrink:0;"></span>
+                    <span style="font-weight:700;color:${color};">${score}%</span>
                   </div>
                 </td>
                 <td><span class="badge ${badgeClass(f.COMPLIANCE_STATUS)}">${f.COMPLIANCE_STATUS}</span></td>
-              </tr>`).join('');
+              </tr>`;
+            }).join('');
           } else {
             topBody.innerHTML = '<tr><td colspan="5" class="empty-state">No factory records found.</td></tr>';
           }
