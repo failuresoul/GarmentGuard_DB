@@ -399,15 +399,13 @@ function fetchSalaryData() {
   const month = document.getElementById('month-filter').value;
   const year = document.getElementById('year-filter').value;
   const status = document.getElementById('status-filter').value;
-
-  let url = `/backend/api/salary.php?month=${encodeURIComponent(month)}&year=${encodeURIComponent(year)}&payment_status=${encodeURIComponent(status)}`;
+  const url = `/backend/api/salary.php?month=${encodeURIComponent(month)}&year=${encodeURIComponent(year)}&payment_status=${encodeURIComponent(status)}`;
 
   fetch(url)
     .then(r => r.json())
     .then(res => {
       if (res.success) {
         salaryRecords = res.data;
-        calculateSummary(salaryRecords);
         renderSalariesTable();
       } else {
         showToast(res.message || 'Failed to fetch salary data', 'error');
@@ -430,6 +428,9 @@ function renderSalariesTable() {
     filtered = filtered.filter(r => String(r.WORKER_NAME).toLowerCase().includes(search));
   }
 
+  // Update summary cards based on the active filtered dataset
+  calculateSummary(filtered);
+
   const tbody = document.getElementById('salary-tbody');
   if (filtered.length === 0) {
     tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:var(--text-secondary);padding:32px;">No salary records found.</td></tr>`;
@@ -448,11 +449,11 @@ function renderSalariesTable() {
         <td><strong>${escHtml(r.WORKER_NAME)}</strong></td>
         <td>${escHtml(r.FACTORY_NAME)}</td>
         <td>${months[r.MONTH]} ${r.YEAR}</td>
-        <td>৳ ${Number(r.BASE_AMOUNT).toLocaleString()}</td>
-        <td>${r.OVERTIME_HOURS} hrs</td>
-        <td>৳ ${Number(r.OVERTIME_PAID).toLocaleString()}</td>
-        <td style="color:var(--red)">৳ ${Number(r.DEDUCTIONS).toLocaleString()}</td>
-        <td style="font-weight:700;color:var(--green)">৳ ${Number(r.NET_SALARY).toLocaleString()}</td>
+        <td style="white-space: nowrap;">৳ ${Number(r.BASE_AMOUNT).toLocaleString()}</td>
+        <td style="white-space: nowrap;">${r.OVERTIME_HOURS} hrs</td>
+        <td style="white-space: nowrap;">৳ ${Number(r.OVERTIME_PAID).toLocaleString()}</td>
+        <td style="white-space: nowrap; color:var(--red)">৳ ${Number(r.DEDUCTIONS).toLocaleString()}</td>
+        <td style="white-space: nowrap; font-weight:700; color:var(--green)">৳ ${Number(r.NET_SALARY).toLocaleString()}</td>
         <td><span class="badge ${statusClass}">${r.PAYMENT_STATUS}</span></td>
         <td style="text-align:right;">${actionBtn}</td>
       </tr>
@@ -462,24 +463,12 @@ function renderSalariesTable() {
 
 // Calculate summary cards
 function calculateSummary(records) {
-  // Filter for currently selected month if active
-  const currentMonthFilter = document.getElementById('month-filter').value;
-  const currentYearFilter = document.getElementById('year-filter').value;
-
-  let filteredForSummary = records;
-  // If months/year filter is empty, fallback to current calendar month/year for summary
-  const now = new Date();
-  const summaryMonth = currentMonthFilter ? parseInt(currentMonthFilter) : (now.getMonth() + 1);
-  const summaryYear = currentYearFilter ? parseInt(currentYearFilter) : now.getFullYear();
-
-  filteredForSummary = records.filter(r => parseInt(r.MONTH) === parseInt(summaryMonth) && parseInt(r.YEAR) === parseInt(summaryYear));
-
   let totalPayroll = 0;
   let totalPaid = 0;
   let totalPending = 0;
   let totalOtHours = 0;
 
-  filteredForSummary.forEach(r => {
+  records.forEach(r => {
     totalPayroll += parseFloat(r.NET_SALARY || 0);
     totalOtHours += parseFloat(r.OVERTIME_HOURS || 0);
     if (r.PAYMENT_STATUS === 'Paid') {
@@ -494,6 +483,18 @@ function calculateSummary(records) {
   document.getElementById('summary-paid').textContent = totalPaid;
   document.getElementById('summary-pending').textContent = totalPending;
   document.getElementById('summary-ot-hours').textContent = `${totalOtHours.toFixed(1)}h`;
+
+  // Dynamically update the Payroll card label based on current active month/year filters
+  const monthFilter = document.getElementById('month-filter');
+  const monthText = monthFilter.options[monthFilter.selectedIndex].text;
+  const yearFilter = document.getElementById('year-filter').value;
+  
+  const payrollLabel = document.querySelector('#summary-payroll').nextElementSibling;
+  if (monthFilter.value) {
+    payrollLabel.textContent = `Total Payroll (${monthText} ${yearFilter})`;
+  } else {
+    payrollLabel.textContent = `Total Payroll (All Months ${yearFilter})`;
+  }
 }
 
 // Mark record as Paid
