@@ -52,9 +52,9 @@ $canProcess = in_array($role, ['admin', 'compliance_officer']);
   <title>GarmentGuard – Salary Management</title>
   <link rel="stylesheet" href="../../assets/css/style.css">
   <style>
-    .filters-bar { display:flex; flex-wrap:wrap; gap:14px; margin-bottom:20px; align-items:center; }
-    .filter-group { display:flex; flex-direction:column; gap:4px; min-width:140px; flex-grow:1; }
-    .filter-group.search-group { flex-grow:2; }
+    .filters-bar { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:20px; align-items:center; }
+    .filter-group { display:flex; flex-direction:column; gap:4px; min-width:110px; flex-grow:1; }
+    .filter-group.search-group { flex-grow:1.5; min-width:150px; }
     .filter-select {
       background:var(--bg-secondary); border:1px solid var(--border-color);
       border-radius:8px; color:var(--text-primary); padding:9px 13px;
@@ -389,6 +389,8 @@ function fetchWorkersList() {
           opt.textContent = `${w.FULL_NAME} (${w.DESIGNATION} - ${w.FACTORY_NAME})`;
           select.appendChild(opt);
         });
+        // Render table to ensure summary cards are updated with loaded worker data
+        renderSalariesTable();
       }
     })
     .catch(err => console.error('Failed to load workers:', err));
@@ -463,20 +465,43 @@ function renderSalariesTable() {
 
 // Calculate summary cards
 function calculateSummary(records) {
+  // Group by WORKER_ID and keep only the latest record (max year and month) for each worker
+  const latestRecordsMap = new Map();
+  records.forEach(r => {
+    const workerId = r.WORKER_ID;
+    const recordTime = parseInt(r.YEAR) * 12 + parseInt(r.MONTH);
+    
+    if (!latestRecordsMap.has(workerId)) {
+      latestRecordsMap.set(workerId, r);
+    } else {
+      const existing = latestRecordsMap.get(workerId);
+      const existingTime = parseInt(existing.YEAR) * 12 + parseInt(existing.MONTH);
+      if (recordTime > existingTime) {
+        latestRecordsMap.set(workerId, r);
+      }
+    }
+  });
+
+  const distinctRecords = Array.from(latestRecordsMap.values());
+
+  const factoryId = document.getElementById('factory-filter').value;
+  // Get active workers matching the selected factory filter
+  const activeWorkers = workers.filter(w => w.STATUS === 'Active' && (!factoryId || String(w.FACTORY_ID) === String(factoryId)));
+  const totalActiveWorkers = activeWorkers.length;
+
   let totalPayroll = 0;
   let totalPaid = 0;
-  let totalPending = 0;
   let totalOtHours = 0;
 
-  records.forEach(r => {
+  distinctRecords.forEach(r => {
     totalPayroll += parseFloat(r.NET_SALARY || 0);
     totalOtHours += parseFloat(r.OVERTIME_HOURS || 0);
     if (r.PAYMENT_STATUS === 'Paid') {
       totalPaid++;
-    } else {
-      totalPending++;
     }
   });
+
+  const totalPending = Math.max(0, totalActiveWorkers - totalPaid);
 
   // Render to DOM
   document.getElementById('summary-payroll').textContent = `৳ ${totalPayroll.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
