@@ -65,6 +65,7 @@ $activePage = 'equipment';
   </div>
 
   <script src="../../assets/js/toast.js"></script>
+  <script src="../../assets/js/table-utils.js"></script>
   <script>
     function condBadge(v) {
       return {'Good':'badge-green','Fair':'badge-amber','Poor':'badge-red','Critical':'badge-red'}[v] || 'badge-gray';

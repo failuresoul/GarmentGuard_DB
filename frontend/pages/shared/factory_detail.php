@@ -516,6 +516,7 @@ if ($role === 'admin') {
   </div>
 
   <script src="../../assets/js/toast.js"></script>
+  <script src="../../assets/js/table-utils.js"></script>
   <script>
     const factoryId = <?php echo $factoryId; ?>;
     

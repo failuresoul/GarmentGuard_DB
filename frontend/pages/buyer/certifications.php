@@ -65,6 +65,7 @@ $activePage = 'certifications';
   </div>
 
   <script src="../../assets/js/toast.js"></script>
+  <script src="../../assets/js/table-utils.js"></script>
   <script>
     function statusBadge(v) { return {'Active':'badge-green','Expired':'badge-red','Revoked':'badge-amber'}[v] || 'badge-gray'; }
 

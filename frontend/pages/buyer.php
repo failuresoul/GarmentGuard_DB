@@ -211,6 +211,7 @@ $navMenu = [
   </div>
 
   <script src="../../assets/js/toast.js"></script>
+  <script src="../../assets/js/table-utils.js"></script>
   <script>
     function getScoreColor(score) {
       if (score >= 75) return 'var(--green)';

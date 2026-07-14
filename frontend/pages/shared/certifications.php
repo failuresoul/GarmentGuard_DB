@@ -310,6 +310,7 @@ $canEdit = in_array($role, ['admin', 'compliance_officer']);
 <?php endif; ?>
 
 <script src="../../assets/js/toast.js"></script>
+  <script src="../../assets/js/table-utils.js"></script>
 <script>
 let allCerts = [];
 let factories = [];

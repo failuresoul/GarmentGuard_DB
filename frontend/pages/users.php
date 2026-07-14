@@ -230,16 +230,16 @@ $navMenu = [
       <!-- Users Table -->
       <div class="card">
         <div class="table-responsive">
-          <table class="table">
+          <table class="table" id="users-table">
             <thead>
               <tr>
                 <th style="width: 60px;">#</th>
-                <th class="sortable-header" onclick="sortBy('full_name')">Full Name <span id="sort-full_name" class="sort-indicator">↕</span></th>
+                <th class="sortable-header" data-col="FULL_NAME">Full Name <span class="sort-indicator">▲▼</span></th>
                 <th>Username</th>
-                <th class="sortable-header" onclick="sortBy('role')">Role <span id="sort-role" class="sort-indicator">↕</span></th>
+                <th class="sortable-header" data-col="ROLE">Role <span class="sort-indicator">▲▼</span></th>
                 <th>Factory</th>
                 <th>Email</th>
-                <th class="sortable-header" onclick="sortBy('status')">Status <span id="sort-status" class="sort-indicator">↕</span></th>
+                <th class="sortable-header" data-col="STATUS">Status <span class="sort-indicator">▲▼</span></th>
                 <th style="width: 180px;">Actions</th>
               </tr>
             </thead>
@@ -265,19 +265,19 @@ $navMenu = [
         <div class="modal-body">
           <div class="form-group">
             <label class="form-label" for="add-full-name">Full Name <span style="color:var(--red)">*</span></label>
-            <input type="text" class="form-control" id="add-full-name" required placeholder="John Doe">
+            <input type="text" class="form-control" id="add-full-name" required data-required="true" placeholder="John Doe">
           </div>
           <div class="form-group">
             <label class="form-label" for="add-username">Username <span style="color:var(--red)">*</span></label>
-            <input type="text" class="form-control" id="add-username" required placeholder="johndoe">
+            <input type="text" class="form-control" id="add-username" required data-required="true" placeholder="johndoe">
           </div>
           <div class="form-group">
             <label class="form-label" for="add-email">Email <span style="color:var(--red)">*</span></label>
-            <input type="email" class="form-control" id="add-email" required placeholder="john@example.com">
+            <input type="email" class="form-control" id="add-email" required data-required="true" placeholder="john@example.com">
           </div>
           <div class="form-group">
             <label class="form-label" for="add-role">Role <span style="color:var(--red)">*</span></label>
-            <select class="form-control" id="add-role" required>
+            <select class="form-control" id="add-role" required data-required="true">
               <option value="">Select Role</option>
               <option value="admin">Admin</option>
               <option value="compliance_officer">Compliance Officer</option>
@@ -294,7 +294,7 @@ $navMenu = [
           </div>
           <div class="form-group">
             <label class="form-label" for="add-password">Password <span style="color:var(--red)">*</span></label>
-            <input type="password" class="form-control" id="add-password" required placeholder="••••••••">
+            <input type="password" class="form-control" id="add-password" required data-required="true" placeholder="••••••••">
           </div>
         </div>
         <div class="modal-footer">
@@ -317,7 +317,7 @@ $navMenu = [
         <div class="modal-body">
           <div class="form-group">
             <label class="form-label" for="edit-full-name">Full Name <span style="color:var(--red)">*</span></label>
-            <input type="text" class="form-control" id="edit-full-name" required placeholder="John Doe">
+            <input type="text" class="form-control" id="edit-full-name" required data-required="true" placeholder="John Doe">
           </div>
           <div class="form-group">
             <label class="form-label" for="edit-username">Username <span style="color:var(--text-secondary)">(Read-only)</span></label>
@@ -325,11 +325,11 @@ $navMenu = [
           </div>
           <div class="form-group">
             <label class="form-label" for="edit-email">Email <span style="color:var(--red)">*</span></label>
-            <input type="email" class="form-control" id="edit-email" required placeholder="john@example.com">
+            <input type="email" class="form-control" id="edit-email" required data-required="true" placeholder="john@example.com">
           </div>
           <div class="form-group">
             <label class="form-label" for="edit-role">Role <span style="color:var(--red)">*</span></label>
-            <select class="form-control" id="edit-role" required>
+            <select class="form-control" id="edit-role" required data-required="true">
               <option value="admin">Admin</option>
               <option value="compliance_officer">Compliance Officer</option>
               <option value="inspector">Inspector</option>
@@ -345,7 +345,7 @@ $navMenu = [
           </div>
           <div class="form-group">
             <label class="form-label" for="edit-status-val">Status <span style="color:var(--red)">*</span></label>
-            <select class="form-control" id="edit-status-val" required>
+            <select class="form-control" id="edit-status-val" required data-required="true">
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
             </select>
@@ -364,19 +364,18 @@ $navMenu = [
   </div>
 
   <script src="/frontend/assets/js/toast.js"></script>
+  <script src="/frontend/assets/js/table-utils.js"></script>
   <script>
     let allUsers = [];
     let allFactories = [];
-    let currentSortCol = 'full_name';
-    let currentSortDir = 'asc';
 
     document.addEventListener('DOMContentLoaded', () => {
       fetchUsers();
       fetchFactories();
 
-      document.getElementById('search-input').addEventListener('input', renderTable);
-      document.getElementById('role-filter').addEventListener('change', renderTable);
-      document.getElementById('status-filter').addEventListener('change', renderTable);
+      document.getElementById('search-input').addEventListener('input', () => renderTable());
+      document.getElementById('role-filter').addEventListener('change', () => renderTable());
+      document.getElementById('status-filter').addEventListener('change', () => renderTable());
     });
 
     function fetchUsers() {
@@ -386,7 +385,9 @@ $navMenu = [
           if (res.success) {
             allUsers = res.data;
             renderTable();
-            updateSortIndicators();
+            TableUtils.initSortHeaders('users-table', allUsers, (sorted) => {
+              renderTable(sorted);
+            });
           } else {
             showToast(res.message || 'Failed to load users', 'error');
           }
@@ -434,67 +435,22 @@ $navMenu = [
                  .join(' ');
     }
 
-    function getFilteredUsers() {
+    function renderTable(data) {
       const roleFilter = document.getElementById('role-filter').value;
       const statusFilter = document.getElementById('status-filter').value;
-      const searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
+      const searchQuery = document.getElementById('search-input').value.trim();
 
-      return allUsers.filter(user => {
-        if (roleFilter !== 'All' && user.ROLE !== roleFilter) {
-          return false;
-        }
-        if (statusFilter !== 'All' && user.STATUS !== statusFilter) {
-          return false;
-        }
-        if (searchQuery) {
-          const uName = (user.USERNAME || '').toLowerCase();
-          const fName = (user.FULL_NAME || '').toLowerCase();
-          if (!uName.includes(searchQuery) && !fName.includes(searchQuery)) {
-            return false;
-          }
-        }
-        return true;
+      const sourceData = data || TableUtils.sortData(
+        allUsers,
+        TableUtils.currentSortCol || 'FULL_NAME',
+        TableUtils.currentSortOrder || 'asc'
+      );
+
+      const list = TableUtils.filterData(sourceData, {
+        search: searchQuery,
+        ROLE: (roleFilter === 'All' ? '' : roleFilter),
+        STATUS: (statusFilter === 'All' ? '' : statusFilter)
       });
-    }
-
-    function sortBy(col) {
-      if (currentSortCol === col) {
-        currentSortDir = currentSortDir === 'asc' ? 'desc' : 'asc';
-      } else {
-        currentSortCol = col;
-        currentSortDir = 'asc';
-      }
-      updateSortIndicators();
-      renderTable();
-    }
-
-    function updateSortIndicators() {
-      const cols = ['full_name', 'role', 'status'];
-      cols.forEach(c => {
-        const indicator = document.getElementById('sort-' + c);
-        const th = indicator.parentElement;
-        if (c === currentSortCol) {
-          indicator.innerText = currentSortDir === 'asc' ? ' ▲' : ' ▼';
-          th.classList.add('active');
-        } else {
-          indicator.innerText = ' ↕';
-          th.classList.remove('active');
-        }
-      });
-    }
-
-    function renderTable() {
-      let list = getFilteredUsers();
-      
-      if (currentSortCol) {
-        list.sort((a, b) => {
-          let valA = (a[currentSortCol.toUpperCase()] || '').toLowerCase();
-          let valB = (b[currentSortCol.toUpperCase()] || '').toLowerCase();
-          if (valA < valB) return currentSortDir === 'asc' ? -1 : 1;
-          if (valA > valB) return currentSortDir === 'asc' ? 1 : -1;
-          return 0;
-        });
-      }
 
       const tbody = document.getElementById('tbody');
       if (list.length === 0) {
@@ -519,17 +475,17 @@ $navMenu = [
 
         return `
           <tr>
-            <td style="color:var(--text-secondary);font-size:13px;">${idx + 1}</td>
+            <td>${idx + 1}</td>
             <td><strong>${escapeHtml(user.FULL_NAME)}</strong></td>
             <td>${escapeHtml(user.USERNAME)}</td>
             <td><span class="badge ${roleClass}">${formatRole(user.ROLE)}</span></td>
-            <td>${escapeHtml(user.FACTORY_NAME || 'N/A')}</td>
-            <td style="color: var(--text-secondary)">${escapeHtml(user.EMAIL)}</td>
+            <td>${escapeHtml(user.FACTORY_NAME || '—')}</td>
+            <td>${escapeHtml(user.EMAIL || '—')}</td>
             <td><span class="badge ${statusClass}">${user.STATUS}</span></td>
             <td>
-              <div style="display:flex; gap:8px;">
-                <button class="btn btn-secondary btn-sm" onclick="openEditModal(${user.USER_ID})">Edit</button>
-                <button class="btn btn-sm ${toggleClass}" onclick="toggleUserStatus(${user.USER_ID}, '${user.STATUS}')">${toggleText}</button>
+              <div style="display:flex;gap:6px;">
+                <button class="btn btn-secondary btn-sm" onclick='openEditModal(${JSON.stringify(user)})'>Edit</button>
+                <button class="btn ${toggleClass} btn-sm" onclick="toggleUserStatus(${user.USER_ID}, '${user.STATUS}')">${toggleText}</button>
               </div>
             </td>
           </tr>
@@ -537,17 +493,25 @@ $navMenu = [
       }).join('');
     }
 
-    // Modal Control
+    // Modal Control Helpers
     function openAddModal() {
-      document.getElementById('add-user-form').reset();
-      document.getElementById('add-modal').classList.add('open');
+      const modal = document.getElementById('add-modal');
+      const form = modal.querySelector('form');
+      if (form) {
+        form.reset();
+        clearErrors(form);
+      }
+      modal.classList.add('open');
     }
 
-    function openEditModal(userId) {
-      const user = allUsers.find(u => u.USER_ID == userId);
-      if (!user) return;
+    function openEditModal(user) {
+      const modal = document.getElementById('edit-modal');
+      const form = modal.querySelector('form');
+      if (form) {
+        form.reset();
+        clearErrors(form);
+      }
 
-      document.getElementById('edit-user-form').reset();
       document.getElementById('edit-user-id').value = user.USER_ID;
       document.getElementById('edit-full-name').value = user.FULL_NAME;
       document.getElementById('edit-username').value = user.USERNAME;
@@ -555,7 +519,7 @@ $navMenu = [
       document.getElementById('edit-role').value = user.ROLE;
       document.getElementById('edit-factory').value = user.FACTORY_ID || '';
       document.getElementById('edit-status-val').value = user.STATUS;
-      document.getElementById('edit-modal').classList.add('open');
+      modal.classList.add('open');
     }
 
     function closeModal(id, event) {
@@ -567,6 +531,13 @@ $navMenu = [
     // Actions API Calls
     function submitAddUser(e) {
       e.preventDefault();
+      const f = e.target;
+
+      const result = validateForm(f);
+      if (!result.valid) {
+        return;
+      }
+
       const payload = {
         full_name: document.getElementById('add-full-name').value.trim(),
         username: document.getElementById('add-username').value.trim(),
@@ -596,6 +567,13 @@ $navMenu = [
 
     function submitEditUser(e) {
       e.preventDefault();
+      const f = e.target;
+
+      const result = validateForm(f);
+      if (!result.valid) {
+        return;
+      }
+
       const payload = {
         user_id: document.getElementById('edit-user-id').value,
         full_name: document.getElementById('edit-full-name').value.trim(),

@@ -71,6 +71,7 @@ $activePage = 'buyer';
   </div>
 
   <script src="../../assets/js/toast.js"></script>
+  <script src="../../assets/js/table-utils.js"></script>
   <script>
     let allRows = [];
     fetch('/backend/api/buyer.php')

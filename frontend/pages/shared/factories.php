@@ -300,7 +300,7 @@ if ($role === 'admin') {
 
         <!-- Factory Table -->
         <div class="table-responsive">
-          <table class="table">
+          <table class="table" id="factories-table">
             <thead>
               <tr>
                 <th class="sortable-header" data-sort="FACTORY_NAME">Factory Name <span class="sort-indicator">▲▼</span></th>
@@ -324,8 +324,8 @@ if ($role === 'admin') {
     </div>
   </div>
 
-  <!-- Add Factory Slide-over Panel (Role-gated) -->
-  <?php if (in_array($role, ['admin', 'compliance_officer'])): ?>
+  <!-- Slide-over Registration Panel -->
+  <?php if ($canAdd): ?>
     <div id="slide-over" class="slide-over-container">
       <div class="slide-over-backdrop" onclick="toggleSlideOver(false)"></div>
       <div class="slide-over-panel">
@@ -337,21 +337,21 @@ if ($role === 'admin') {
           <div class="slide-over-body">
             <div class="form-group">
               <label class="form-label" for="factory_name">Factory Name <span style="color:var(--red)">*</span></label>
-              <input type="text" class="form-control" id="factory_name" name="factory_name" placeholder="Enter factory name">
+              <input type="text" class="form-control" id="factory_name" name="factory_name" placeholder="Enter factory name" data-required="true">
             </div>
             <div class="form-group">
               <label class="form-label" for="registration_no">Registration No <span style="color:var(--red)">*</span></label>
-              <input type="text" class="form-control" id="registration_no" name="registration_no" placeholder="Unique Reg No">
+              <input type="text" class="form-control" id="registration_no" name="registration_no" placeholder="Unique Reg No" data-required="true">
             </div>
             <div class="form-group">
               <label class="form-label" for="address">Address <span style="color:var(--red)">*</span></label>
-              <input type="text" class="form-control" id="address" name="address" placeholder="Factory address">
+              <input type="text" class="form-control" id="address" name="address" placeholder="Factory address" data-required="true">
             </div>
             
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
               <div class="form-group">
                 <label class="form-label" for="district">District <span style="color:var(--red)">*</span></label>
-                <select class="form-control" id="district" name="district">
+                <select class="form-control" id="district" name="district" data-required="true">
                   <option value="">Select District</option>
                   <option value="Dhaka">Dhaka</option>
                   <option value="Gazipur">Gazipur</option>
@@ -365,7 +365,7 @@ if ($role === 'admin') {
               </div>
               <div class="form-group">
                 <label class="form-label" for="division">Division <span style="color:var(--red)">*</span></label>
-                <select class="form-control" id="division" name="division">
+                <select class="form-control" id="division" name="division" data-required="true">
                   <option value="">Select Division</option>
                   <option value="Dhaka">Dhaka</option>
                   <option value="Gazipur">Gazipur</option>
@@ -381,11 +381,11 @@ if ($role === 'admin') {
 
             <div class="form-group">
               <label class="form-label" for="total_workers">Total Workers</label>
-              <input type="number" class="form-control" id="total_workers" name="total_workers" value="0" min="0">
+              <input type="number" class="form-control" id="total_workers" name="total_workers" value="0" min="0" data-min="0">
             </div>
             <div class="form-group">
               <label class="form-label" for="contact_person">Contact Person <span style="color:var(--red)">*</span></label>
-              <input type="text" class="form-control" id="contact_person" name="contact_person" placeholder="Primary contact name">
+              <input type="text" class="form-control" id="contact_person" name="contact_person" placeholder="Primary contact name" data-required="true">
             </div>
             
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
@@ -395,7 +395,7 @@ if ($role === 'admin') {
               </div>
               <div class="form-group">
                 <label class="form-label" for="email">Email <span style="color:var(--red)">*</span></label>
-                <input type="email" class="form-control" id="email" name="email" placeholder="contact@email.com">
+                <input type="email" class="form-control" id="email" name="email" placeholder="contact@email.com" data-required="true">
               </div>
             </div>
           </div>
@@ -410,6 +410,7 @@ if ($role === 'admin') {
 
   <script src="../../assets/js/toast.js"></script>
   <script src="../../assets/js/validate.js"></script>
+  <script src="../../assets/js/table-utils.js"></script>
   <script>
     // State storage variables
     let allFactories = [];
@@ -424,6 +425,9 @@ if ($role === 'admin') {
           if (res.success) {
             allFactories = res.data;
             filterAndRender();
+            TableUtils.initSortHeaders('factories-table', allFactories, (sortedData) => {
+              renderTable(sortedData);
+            });
           } else {
             showToast(res.message || 'Failed to load factories data', 'error');
           }
@@ -439,6 +443,7 @@ if ($role === 'admin') {
         container.classList.add('open');
       } else {
         container.classList.remove('open');
+        clearErrors(container.querySelector('form'));
       }
     }
 
@@ -461,71 +466,18 @@ if ($role === 'admin') {
       return map[status] || 'badge-gray';
     }
 
-    // Parse Oracle DD-Mon-YYYY date string (e.g. "15-Jan-2026") to a Date for sorting
-    function parseDate(dateStr) {
-      if (!dateStr || dateStr === '—') return new Date(0);
-      const months = { Jan:0, Feb:1, Mar:2, Apr:3, May:4, Jun:5,
-                       Jul:6, Aug:7, Sep:8, Oct:9, Nov:10, Dec:11 };
-      const parts = String(dateStr).split('-');
-      if (parts.length === 3) {
-        const day   = parseInt(parts[0], 10);
-        const month = months[parts[1]];
-        const year  = parseInt(parts[2], 10);
-        if (!isNaN(day) && month !== undefined && !isNaN(year)) {
-          return new Date(year, month, day);
-        }
-      }
-      return new Date(0);
-    }
-
-    function sortData(data) {
-      return data.sort((a, b) => {
-        let valA = a[sortColumn];
-        let valB = b[sortColumn];
-
-        // Parse null/undefined
-        if (valA === null || valA === undefined) valA = '';
-        if (valB === null || valB === undefined) valB = '';
-
-        // Special handling for date columns
-        if (sortColumn === 'LAST_AUDIT_DATE') {
-          valA = parseDate(valA);
-          valB = parseDate(valB);
-        }
-
-        // Special handling for numeric columns
-        if (sortColumn === 'CALCULATED_SCORE' || sortColumn === 'TOTAL_WORKERS') {
-          valA = parseFloat(valA) || 0;
-          valB = parseFloat(valB) || 0;
-        }
-
-        if (typeof valA === 'string') {
-          valA = valA.toLowerCase();
-          valB = valB.toLowerCase();
-        }
-
-        if (valA < valB) return sortAscending ? -1 : 1;
-        if (valA > valB) return sortAscending ? 1 : -1;
-        return 0;
-      });
-    }
-
-    // Apply active filters and render to table
-    function filterAndRender() {
+    // Render table data
+    function renderTable(data) {
       const q = document.getElementById('search-input').value.toLowerCase().trim();
       const dist = document.getElementById('district-filter').value;
       const status = document.getElementById('status-filter').value;
 
-      // Filter local list
-      let filtered = allFactories.filter(f => {
-        const matchesQuery = f.FACTORY_NAME.toLowerCase().includes(q) || f.DISTRICT.toLowerCase().includes(q);
-        const matchesDist = dist === '' || f.DISTRICT === dist;
-        const matchesStatus = status === '' || f.COMPLIANCE_STATUS === status;
-        return matchesQuery && matchesDist && matchesStatus;
+      // Filter using TableUtils
+      const filtered = TableUtils.filterData(data || allFactories, {
+        search: q,
+        DISTRICT: dist,
+        COMPLIANCE_STATUS: status
       });
-
-      // Sort local list
-      filtered = sortData(filtered);
 
       const tbody = document.getElementById('factories-tbody');
       if (filtered.length === 0) {
@@ -561,44 +513,38 @@ if ($role === 'admin') {
       }).join('');
     }
 
+    // Apply active filters and render to table
+    function filterAndRender() {
+      // Sort using TableUtils state before rendering
+      const sorted = TableUtils.sortData(
+        allFactories,
+        TableUtils.currentSortCol || 'FACTORY_NAME',
+        TableUtils.currentSortOrder || 'asc'
+      );
+      renderTable(sorted);
+    }
+
     // Add Form Submit Handling
     function submitFactoryForm(event) {
       event.preventDefault();
       const form = event.target;
       
-      const nameInput = form.elements['factory_name'];
-      const regInput = form.elements['registration_no'];
-      const addrInput = form.elements['address'];
-      const distInput = form.elements['district'];
-      const divInput = form.elements['division'];
-      const workersInput = form.elements['total_workers'];
-      const contactInput = form.elements['contact_person'];
-      const phoneInput = form.elements['phone'];
-      const emailInput = form.elements['email'];
-      
-      const isNameOk = validateInput(nameInput, isNotEmpty, 'Factory name is required');
-      const isRegOk = validateInput(regInput, isNotEmpty, 'Registration number is required');
-      const isAddrOk = validateInput(addrInput, isNotEmpty, 'Address is required');
-      const isDistOk = validateInput(distInput, isNotEmpty, 'Please select a district');
-      const isDivOk = validateInput(divInput, isNotEmpty, 'Please select a division');
-      const isContactOk = validateInput(contactInput, isNotEmpty, 'Contact person is required');
-      const isPhoneOk = phoneInput.value.trim() === '' || validateInput(phoneInput, isValidPhone, 'Invalid phone number format');
-      const isEmailOk = validateInput(emailInput, isValidEmail, 'Invalid email address');
-      
-      if (!isNameOk || !isRegOk || !isAddrOk || !isDistOk || !isDivOk || !isContactOk || !isPhoneOk || !isEmailOk) {
+      // Perform validation using validateForm
+      const result = validateForm(form);
+      if (!result.valid) {
         return;
       }
 
       const payload = {
-        factory_name: nameInput.value.trim(),
-        registration_no: regInput.value.trim(),
-        address: addrInput.value.trim(),
-        district: distInput.value,
-        division: divInput.value,
-        total_workers: parseInt(workersInput.value) || 0,
-        contact_person: contactInput.value.trim(),
-        phone: phoneInput.value.trim(),
-        email: emailInput.value.trim()
+        factory_name: form.elements['factory_name'].value.trim(),
+        registration_no: form.elements['registration_no'].value.trim(),
+        address: form.elements['address'].value.trim(),
+        district: form.elements['district'].value,
+        division: form.elements['division'].value,
+        total_workers: parseInt(form.elements['total_workers'].value) || 0,
+        contact_person: form.elements['contact_person'].value.trim(),
+        phone: form.elements['phone'].value.trim(),
+        email: form.elements['email'].value.trim()
       };
 
       fetch('/backend/api/factories.php', {
@@ -611,7 +557,7 @@ if ($role === 'admin') {
         if (res.success) {
           toggleSlideOver(false);
           form.reset();
-          form.querySelectorAll('.form-control').forEach(el => el.classList.remove('is-valid', 'is-invalid'));
+          clearErrors(form);
           fetchFactories();
           showToast('Factory registered successfully', 'success');
         } else {
@@ -629,34 +575,6 @@ if ($role === 'admin') {
       document.getElementById('search-input').addEventListener('input', filterAndRender);
       document.getElementById('district-filter').addEventListener('change', filterAndRender);
       document.getElementById('status-filter').addEventListener('change', filterAndRender);
-
-      // Sort events
-      document.querySelectorAll('.sortable-header').forEach(header => {
-        header.addEventListener('click', () => {
-          const col = header.getAttribute('data-sort');
-          if (sortColumn === col) {
-            sortAscending = !sortAscending;
-          } else {
-            sortColumn = col;
-            sortAscending = true;
-          }
-
-          // Update active headers UI indicator
-          document.querySelectorAll('.sortable-header').forEach(h => {
-            h.classList.remove('active');
-            const ind = h.querySelector('.sort-indicator');
-            if (ind) ind.innerText = '▲▼';
-          });
-
-          header.classList.add('active');
-          const indicator = header.querySelector('.sort-indicator');
-          if (indicator) {
-            indicator.innerText = sortAscending ? '▲' : '▼';
-          }
-
-          filterAndRender();
-        });
-      });
     });
   </script>
 </body>

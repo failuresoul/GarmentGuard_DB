@@ -445,6 +445,7 @@ $canSubmit = ($role === 'compliance_officer');
 </div>
 
 <script src="../../assets/js/toast.js"></script>
+  <script src="../../assets/js/table-utils.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════════════
 //  STATE

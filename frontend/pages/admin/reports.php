@@ -89,6 +89,7 @@ $activePage = 'reports';
   </div>
 
   <script src="../../assets/js/toast.js"></script>
+  <script src="../../assets/js/table-utils.js"></script>
   <script>
     function scoreColor(s) { return s >= 75 ? 'var(--green)' : s >= 50 ? 'var(--amber)' : 'var(--red)'; }
     function fmt(n) { return '৳ ' + Number(n).toLocaleString(); }

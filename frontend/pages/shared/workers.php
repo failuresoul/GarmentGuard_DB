@@ -225,7 +225,7 @@ $canAdd = in_array($role, ['admin', 'compliance_officer']);
 
       <!-- Table -->
       <div class="table-responsive">
-        <table class="table">
+        <table class="table" id="workers-table">
           <thead>
             <tr>
               <th style="width:44px">#</th>
@@ -247,22 +247,12 @@ $canAdd = in_array($role, ['admin', 'compliance_officer']);
       </div>
 
       <!-- Pagination -->
-      <div class="pagination-bar">
+      <div class="pagination-bar" style="display:flex; justify-content:space-between; align-items:center;">
         <div style="display:flex;align-items:center;gap:10px;">
           <span class="pagination-info">Rows per page:</span>
-          <select class="per-page-select" id="per-page">
-            <option value="10">10</option>
-            <option value="25">25</option>
-            <option value="50">50</option>
-          </select>
+          <select class="per-page-select" id="per-page"></select>
         </div>
-        <div style="display:flex;align-items:center;gap:16px;">
-          <span class="pagination-info" id="pagination-info">Showing 0–0 of 0 results</span>
-          <div class="pagination-controls">
-            <button class="page-btn" id="prev-btn" onclick="changePage(-1)" disabled>← Prev</button>
-            <button class="page-btn" id="next-btn" onclick="changePage(1)" disabled>Next →</button>
-          </div>
-        </div>
+        <div id="pagination-controls-container" style="display: flex; align-items: center;"></div>
       </div>
     </div>
   </div>
@@ -328,7 +318,7 @@ $canAdd = in_array($role, ['admin', 'compliance_officer']);
 
         <div class="form-group">
           <label class="form-label" for="aw-factory">Factory <span style="color:var(--red)">*</span></label>
-          <select class="form-control" id="aw-factory" name="factory_id">
+          <select class="form-control" id="aw-factory" name="factory_id" data-required="true">
             <option value="">Select Factory</option>
           </select>
         </div>
@@ -336,18 +326,18 @@ $canAdd = in_array($role, ['admin', 'compliance_officer']);
         <div class="form-grid-2">
           <div class="form-group">
             <label class="form-label" for="aw-name">Full Name <span style="color:var(--red)">*</span></label>
-            <input type="text" class="form-control" id="aw-name" name="full_name" placeholder="Worker full name">
+            <input type="text" class="form-control" id="aw-name" name="full_name" placeholder="Worker full name" data-required="true">
           </div>
           <div class="form-group">
             <label class="form-label" for="aw-nid">National ID <span style="color:var(--red)">*</span></label>
-            <input type="text" class="form-control" id="aw-nid" name="national_id" placeholder="NID-XXXXX">
+            <input type="text" class="form-control" id="aw-nid" name="national_id" placeholder="NID-XXXXX" data-required="true">
           </div>
         </div>
 
         <div class="form-grid-2">
           <div class="form-group">
             <label class="form-label" for="aw-desig">Designation <span style="color:var(--red)">*</span></label>
-            <select class="form-control" id="aw-desig" name="designation">
+            <select class="form-control" id="aw-desig" name="designation" data-required="true">
               <option value="">Select</option>
               <option value="Operator">Operator</option>
               <option value="Helper">Helper</option>
@@ -358,7 +348,7 @@ $canAdd = in_array($role, ['admin', 'compliance_officer']);
           </div>
           <div class="form-group">
             <label class="form-label" for="aw-shift">Shift <span style="color:var(--red)">*</span></label>
-            <select class="form-control" id="aw-shift" name="shift">
+            <select class="form-control" id="aw-shift" name="shift" data-required="true">
               <option value="">Select</option>
               <option value="Morning">Morning</option>
               <option value="Evening">Evening</option>
@@ -370,11 +360,11 @@ $canAdd = in_array($role, ['admin', 'compliance_officer']);
         <div class="form-grid-2">
           <div class="form-group">
             <label class="form-label" for="aw-join">Join Date <span style="color:var(--red)">*</span></label>
-            <input type="date" class="form-control" id="aw-join" name="join_date">
+            <input type="date" class="form-control" id="aw-join" name="join_date" data-required="true">
           </div>
           <div class="form-group">
             <label class="form-label" for="aw-salary">Base Salary (৳) <span style="color:var(--red)">*</span></label>
-            <input type="number" class="form-control" id="aw-salary" name="base_salary" placeholder="e.g. 12000" min="0" step="0.01">
+            <input type="number" class="form-control" id="aw-salary" name="base_salary" placeholder="e.g. 12000" min="0" step="0.01" data-required="true" data-min="0">
           </div>
         </div>
 
@@ -400,14 +390,12 @@ $canAdd = in_array($role, ['admin', 'compliance_officer']);
 <?php endif; ?>
 
 <script src="../../assets/js/toast.js"></script>
+<script src="../../assets/js/table-utils.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════════════
 //  STATE
 // ═══════════════════════════════════════════════════════════════
 let allWorkers   = [];
-let filteredWorkers = [];
-let sortColumn   = 'FULL_NAME';
-let sortAscending = true;
 let currentPage  = 1;
 let perPage      = 10;
 let editingWorkerId = null;
@@ -418,23 +406,10 @@ let editingWorkerId = null;
 document.addEventListener('DOMContentLoaded', () => {
   fetchWorkers();
 
-  document.getElementById('search-input')     .addEventListener('input',  applyFilters);
-  document.getElementById('factory-filter')   .addEventListener('change', applyFilters);
-  document.getElementById('status-filter')    .addEventListener('change', applyFilters);
-  document.getElementById('designation-filter').addEventListener('change', applyFilters);
-  document.getElementById('per-page')         .addEventListener('change', e => { perPage = parseInt(e.target.value); currentPage = 1; renderPage(); });
-
-  document.querySelectorAll('.sortable-header').forEach(th => {
-    th.addEventListener('click', () => {
-      const col = th.dataset.sort;
-      if (sortColumn === col) { sortAscending = !sortAscending; }
-      else { sortColumn = col; sortAscending = true; }
-      document.querySelectorAll('.sortable-header').forEach(h => { h.classList.remove('active'); h.querySelector('.sort-indicator').textContent = '▲▼'; });
-      th.classList.add('active');
-      th.querySelector('.sort-indicator').textContent = sortAscending ? '▲' : '▼';
-      applyFilters();
-    });
-  });
+  document.getElementById('search-input')     .addEventListener('input',  () => { currentPage = 1; applyFilters(); });
+  document.getElementById('factory-filter')   .addEventListener('change', () => { currentPage = 1; applyFilters(); });
+  document.getElementById('status-filter')    .addEventListener('change', () => { currentPage = 1; applyFilters(); });
+  document.getElementById('designation-filter').addEventListener('change', () => { currentPage = 1; applyFilters(); });
 });
 
 // ═══════════════════════════════════════════════════════════════
@@ -447,7 +422,27 @@ function fetchWorkers() {
       if (!res.success) { showToast(res.message || 'Failed to load workers', 'error'); return; }
       allWorkers = res.data.map(w => ({ ...w, JOIN_DATE_RAW: parseOracleDate(w.JOIN_DATE) }));
       populateFactoryFilter();
+      
+      // Hook search query parameter from global search bar
+      const params = new URLSearchParams(window.location.search);
+      const searchParam = params.get('search');
+      if (searchParam) {
+        document.getElementById('search-input').value = searchParam;
+      }
+      
       applyFilters();
+
+      // Initialize sort headers using TableUtils
+      TableUtils.initSortHeaders('workers-table', allWorkers, (sorted) => {
+        applyFilters(sorted);
+      });
+
+      // Initialize page size selector using TableUtils
+      TableUtils.pageSizeSelector('per-page', (size) => {
+        perPage = size;
+        currentPage = 1;
+        applyFilters();
+      });
     })
     .catch(() => showToast('Network error loading workers', 'error'));
 }
@@ -481,51 +476,40 @@ function populateFactoryFilter() {
 // ═══════════════════════════════════════════════════════════════
 //  FILTER + SORT + PAGINATE
 // ═══════════════════════════════════════════════════════════════
-function applyFilters() {
+function applyFilters(sortedData) {
   const q    = document.getElementById('search-input').value.toLowerCase().trim();
   const fac  = document.getElementById('factory-filter').value;
   const stat = document.getElementById('status-filter').value;
   const desig= document.getElementById('designation-filter').value;
 
-  filteredWorkers = allWorkers.filter(w => {
-    const matchQ    = !q || w.FULL_NAME.toLowerCase().includes(q) || w.NATIONAL_ID.toLowerCase().includes(q) || w.DESIGNATION.toLowerCase().includes(q);
-    const matchFac  = !fac  || String(w.FACTORY_ID) === fac;
-    const matchStat = !stat || w.STATUS === stat;
-    const matchDesig= !desig || w.DESIGNATION.toLowerCase().includes(desig.toLowerCase());
-    return matchQ && matchFac && matchStat && matchDesig;
+  // Use sorted data if provided, otherwise sort data using TableUtils current sort config
+  const sourceData = sortedData || TableUtils.sortData(
+    allWorkers,
+    TableUtils.currentSortCol || 'FULL_NAME',
+    TableUtils.currentSortOrder || 'asc'
+  );
+
+  // Filter using TableUtils
+  const filtered = TableUtils.filterData(sourceData, {
+    search: q,
+    FACTORY_ID: fac,
+    STATUS: stat,
+    DESIGNATION: desig
   });
 
-  // Sort
-  filteredWorkers.sort((a, b) => {
-    let va = a[sortColumn] ?? '';
-    let vb = b[sortColumn] ?? '';
-    if (sortColumn === 'BASE_SALARY' || sortColumn === 'JOIN_DATE_RAW') {
-      va = parseFloat(va) || 0;
-      vb = parseFloat(vb) || 0;
-    } else {
-      va = String(va).toLowerCase();
-      vb = String(vb).toLowerCase();
-    }
-    if (va < vb) return sortAscending ? -1 : 1;
-    if (va > vb) return sortAscending ?  1 : -1;
-    return 0;
-  });
-
-  currentPage = 1;
-  renderPage();
+  renderPage(filtered);
 }
 
-function renderPage() {
-  const total = filteredWorkers.length;
-  const start = (currentPage - 1) * perPage;
-  const end   = Math.min(start + perPage, total);
-  const page  = filteredWorkers.slice(start, end);
+function renderPage(filtered) {
+  const paginated = TableUtils.paginate(filtered, currentPage, perPage);
+  const total = paginated.total;
+  const start = (paginated.page - 1) * paginated.pageSize;
 
-  // Info text
-  document.getElementById('pagination-info').textContent =
-    total === 0 ? 'No results' : `Showing ${start + 1}–${end} of ${total} results`;
-  document.getElementById('prev-btn').disabled = currentPage <= 1;
-  document.getElementById('next-btn').disabled = end >= total;
+  // Render pagination controls using TableUtils
+  TableUtils.renderPagination('pagination-controls-container', paginated, (newPage) => {
+    currentPage = newPage;
+    applyFilters();
+  });
 
   const tbody = document.getElementById('workers-tbody');
   if (total === 0) {
@@ -533,7 +517,7 @@ function renderPage() {
     return;
   }
 
-  tbody.innerHTML = page.map((w, idx) => `
+  tbody.innerHTML = paginated.rows.map((w, idx) => `
     <tr>
       <td style="color:var(--text-secondary);font-size:13px;">${start + idx + 1}</td>
       <td><strong>${escHtml(w.FULL_NAME)}</strong></td>
@@ -558,7 +542,7 @@ function renderPage() {
 
 function changePage(dir) {
   currentPage += dir;
-  renderPage();
+  applyFilters();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -647,12 +631,25 @@ function submitStatusEdit() {
 //  ADD WORKER MODAL
 // ═══════════════════════════════════════════════════════════════
 function openAddModal() {
-  document.getElementById('add-modal').classList.add('open');
+  const modal = document.getElementById('add-modal');
+  modal.classList.add('open');
+  const form = modal.querySelector('form');
+  if (form) {
+    form.reset();
+    clearErrors(form);
+  }
 }
 
 function submitAddWorker(e) {
   e.preventDefault();
   const f = e.target;
+  
+  // Use validateForm for validation
+  const result = validateForm(f);
+  if (!result.valid) {
+    return;
+  }
+
   const payload = {
     factory_id:  f.factory_id.value,
     full_name:   f.full_name.value.trim(),
@@ -664,11 +661,6 @@ function submitAddWorker(e) {
     phone:       f.phone.value.trim(),
     email:       f.email.value.trim()
   };
-
-  if (!payload.factory_id || !payload.full_name || !payload.national_id || !payload.designation || !payload.join_date || !payload.base_salary || !payload.shift) {
-    showToast('Please fill in all required fields', 'error');
-    return;
-  }
 
   const btn = document.getElementById('add-submit-btn');
   btn.disabled = true;

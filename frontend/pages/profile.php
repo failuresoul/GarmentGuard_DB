@@ -324,6 +324,7 @@ if ($role !== 'worker') {
   </div>
 
   <script src="/frontend/assets/js/toast.js"></script>
+  <script src="/frontend/assets/js/table-utils.js"></script>
   <script>
     const sessionUserId = <?php echo intval($user_id); ?>;
 

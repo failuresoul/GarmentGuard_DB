@@ -65,6 +65,7 @@ $activePage = 'grievances';
   </div>
 
   <script src="../../assets/js/toast.js"></script>
+  <script src="../../assets/js/table-utils.js"></script>
   <script>
     function statusBadge(v) { return {'Open':'badge-red','In Progress':'badge-amber','Resolved':'badge-green'}[v] || 'badge-gray'; }
 

@@ -298,7 +298,7 @@ $canRecord   = in_array($role, ['admin', 'inspector']);
 
       <!-- Audits Table -->
       <div class="table-responsive">
-        <table class="table">
+        <table class="table" id="audits-table">
           <thead>
             <tr>
               <th class="sortable-header active" data-sort="AUDIT_ID">Audit ID <span class="sort-indicator">▼</span></th>
@@ -338,14 +338,14 @@ $canRecord   = in_array($role, ['admin', 'inspector']);
       <div class="modal-body">
         <div class="form-group">
           <label class="form-label" for="sa-factory">Factory <span style="color: var(--red)">*</span></label>
-          <select class="form-control" id="sa-factory" name="factory_id" required>
+          <select class="form-control" id="sa-factory" name="factory_id" required data-required="true">
             <option value="">Select Factory</option>
           </select>
         </div>
 
         <div class="form-group">
           <label class="form-label" for="sa-inspector">Inspector <span style="color: var(--red)">*</span></label>
-          <select class="form-control" id="sa-inspector" name="inspector_id" required>
+          <select class="form-control" id="sa-inspector" name="inspector_id" required data-required="true">
             <option value="">Select Inspector</option>
           </select>
         </div>
@@ -353,7 +353,7 @@ $canRecord   = in_array($role, ['admin', 'inspector']);
         <div class="form-grid-2">
           <div class="form-group">
             <label class="form-label" for="sa-audit-date">Audit Date <span style="color: var(--red)">*</span></label>
-            <input type="date" class="form-control" id="sa-audit-date" name="audit_date" required>
+            <input type="date" class="form-control" id="sa-audit-date" name="audit_date" required data-required="true">
           </div>
           <div class="form-group">
             <label class="form-label" for="sa-next-date">Next Scheduled Date</label>
@@ -386,7 +386,7 @@ $canRecord   = in_array($role, ['admin', 'inspector']);
         <div class="form-grid-2">
           <div class="form-group">
             <label class="form-label" for="rs-score">Score (0-100) <span style="color: var(--red)">*</span></label>
-            <input type="number" class="form-control" id="rs-score" name="score" min="0" max="100" placeholder="e.g. 85" required>
+            <input type="number" class="form-control" id="rs-score" name="score" min="0" max="100" placeholder="e.g. 85" required data-required="true" data-min="0" data-max="100">
           </div>
           <div class="form-group">
             <label class="form-label">Result <span style="color: var(--red)">*</span></label>
@@ -421,14 +421,14 @@ $canRecord   = in_array($role, ['admin', 'inspector']);
 <?php endif; ?>
 
 <script src="../../assets/js/toast.js"></script>
+<script src="../../assets/js/validate.js"></script>
+<script src="../../assets/js/table-utils.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════════════
 //  STATE
 // ═══════════════════════════════════════════════════════════════
 let allRows       = [];
 let filteredRows  = [];
-let sortColumn    = 'AUDIT_ID';
-let sortAscending = false; // default newest/highest ID first
 
 const canRecord   = <?php echo $canRecord ? 'true' : 'false'; ?>;
 
@@ -438,30 +438,11 @@ const canRecord   = <?php echo $canRecord ? 'true' : 'false'; ?>;
 document.addEventListener('DOMContentLoaded', () => {
   fetchAudits();
 
-  document.getElementById('factory-filter').addEventListener('change', applyFilters);
-  document.getElementById('result-filter').addEventListener('change', applyFilters);
-  document.getElementById('date-from').addEventListener('change', applyFilters);
-  document.getElementById('date-to').addEventListener('change', applyFilters);
-  document.getElementById('search-input').addEventListener('input', applyFilters);
-
-  document.querySelectorAll('.sortable-header').forEach(th => {
-    th.addEventListener('click', () => {
-      const col = th.dataset.sort;
-      if (sortColumn === col) {
-        sortAscending = !sortAscending;
-      } else {
-        sortColumn = col;
-        sortAscending = true;
-      }
-      document.querySelectorAll('.sortable-header').forEach(h => {
-        h.classList.remove('active');
-        h.querySelector('.sort-indicator').textContent = '▲▼';
-      });
-      th.classList.add('active');
-      th.querySelector('.sort-indicator').textContent = sortAscending ? '▲' : '▼';
-      applyFilters();
-    });
-  });
+  document.getElementById('factory-filter').addEventListener('change', () => applyFilters());
+  document.getElementById('result-filter').addEventListener('change', () => applyFilters());
+  document.getElementById('date-from').addEventListener('change', () => applyFilters());
+  document.getElementById('date-to').addEventListener('change', () => applyFilters());
+  document.getElementById('search-input').addEventListener('input', () => applyFilters());
 
   // Automatically update the radio button based on score value helper
   const scoreInput = document.getElementById('rs-score');
@@ -496,7 +477,20 @@ function fetchAudits() {
         NEXT_SCHEDULED_RAW: parseOracleDate(r.NEXT_SCHEDULED)
       }));
       populateFactoryFilter(allRows);
+
+      // Hook search query parameter from global search bar
+      const params = new URLSearchParams(window.location.search);
+      const searchParam = params.get('search');
+      if (searchParam) {
+        document.getElementById('search-input').value = searchParam;
+      }
+
       applyFilters();
+
+      // Initialize sort headers using TableUtils
+      TableUtils.initSortHeaders('audits-table', allRows, (sorted) => {
+        applyFilters(sorted);
+      });
     })
     .catch(() => showToast('Network error loading audits', 'error'));
 }
@@ -519,67 +513,57 @@ function populateFactoryFilter(rows) {
 // ═══════════════════════════════════════════════════════════════
 //  FILTER & SORTING LOGIC
 // ═══════════════════════════════════════════════════════════════
-function applyFilters() {
+function applyFilters(sortedData) {
   const factory = document.getElementById('factory-filter').value;
   const result = document.getElementById('result-filter').value;
   const fromVal = document.getElementById('date-from').value;
   const toVal = document.getElementById('date-to').value;
-  const search = document.getElementById('search-input').value.toLowerCase();
+  const search = document.getElementById('search-input').value.trim();
 
   const fromTime = parseInputDate(fromVal);
   const toTime = parseInputDate(toVal);
 
-  filteredRows = allRows.filter(r => {
-    // Factory dropdown
-    if (factory && r.FACTORY_NAME !== factory) return false;
-    // Result dropdown
-    if (result && result !== 'All' && r.RESULT !== result) return false;
-    // Search by Factory Name or Inspector Name
-    if (search) {
-      const fName = (r.FACTORY_NAME || '').toLowerCase();
-      const iName = (r.INSPECTOR_NAME || '').toLowerCase();
-      if (!fName.includes(search) && !iName.includes(search)) return false;
-    }
-    // Date range
-    if (r.AUDIT_DATE) {
-      const dateTime = parseOracleDate(r.AUDIT_DATE);
-      if (fromTime && dateTime < fromTime) return false;
-      if (toTime && dateTime > toTime) return false;
-    } else {
-      if (fromTime || toTime) return false;
-    }
-    return true;
+  // Use sorted data if available, otherwise sort data using TableUtils current sort config
+  const sourceData = sortedData || TableUtils.sortData(
+    allRows,
+    TableUtils.currentSortCol || 'AUDIT_ID',
+    TableUtils.currentSortOrder || 'desc'
+  );
+
+  // Filter basic search and exact matches using TableUtils
+  let filtered = TableUtils.filterData(sourceData, {
+    search: search,
+    FACTORY_NAME: factory,
+    RESULT: (result === 'All' ? '' : result)
   });
 
-  // Apply Sorting
-  filteredRows.sort((a, b) => {
-    let va = a[sortColumn] ?? '';
-    let vb = b[sortColumn] ?? '';
+  // Filter custom date range manually
+  if (fromTime || toTime) {
+    filtered = filtered.filter(r => {
+      if (r.AUDIT_DATE) {
+        const dateTime = parseOracleDate(r.AUDIT_DATE);
+        if (fromTime && dateTime < fromTime) return false;
+        if (toTime && dateTime > toTime) return false;
+      } else {
+        return false;
+      }
+      return true;
+    });
+  }
 
-    if (sortColumn === 'AUDIT_ID' || sortColumn === 'SCORE' || sortColumn === 'AUDIT_DATE_RAW' || sortColumn === 'NEXT_SCHEDULED_RAW') {
-      va = parseFloat(va) || 0;
-      vb = parseFloat(vb) || 0;
-    } else {
-      va = String(va).toLowerCase();
-      vb = String(vb).toLowerCase();
-    }
-
-    if (va < vb) return sortAscending ? -1 : 1;
-    if (va > vb) return sortAscending ? 1 : -1;
-    return 0;
-  });
-
-  renderTable();
+  renderTable(filtered);
 }
 
-function renderTable() {
+function renderTable(filtered) {
+  const displayRows = filtered || [];
   const tbody = document.getElementById('audits-tbody');
-  if (filteredRows.length === 0) {
+  
+  if (displayRows.length === 0) {
     tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-secondary); padding: 32px;">No audits found matching the current filters.</td></tr>`;
     return;
   }
 
-  tbody.innerHTML = filteredRows.map(r => {
+  tbody.innerHTML = displayRows.map(r => {
     const scoreVal = r.SCORE !== null ? Math.round(r.SCORE) : null;
     const progressFill = scoreVal !== null ? scoreVal : 0;
     const scoreDisplay = scoreVal !== null ? `${scoreVal}%` : 'N/A';
@@ -645,7 +629,13 @@ function toggleDetails(auditId) {
 <?php if ($canSchedule): ?>
 function openScheduleModal() {
   loadScheduleDropdowns();
-  document.getElementById('schedule-modal').classList.add('open');
+  const modal = document.getElementById('schedule-modal');
+  modal.classList.add('open');
+  const form = modal.querySelector('form');
+  if (form) {
+    form.reset();
+    clearErrors(form);
+  }
 }
 
 function loadScheduleDropdowns() {
@@ -685,6 +675,13 @@ function loadScheduleDropdowns() {
 function submitScheduleAudit(e) {
   e.preventDefault();
   const f = e.target;
+
+  // Use validateForm for schedule audit form
+  const result = validateForm(f);
+  if (!result.valid) {
+    return;
+  }
+
   const payload = {
     factory_id: parseInt(f.factory_id.value),
     inspector_id: parseInt(f.inspector_id.value),
@@ -706,6 +703,7 @@ function submitScheduleAudit(e) {
     if (res.success) {
       document.getElementById('schedule-modal').classList.remove('open');
       f.reset();
+      clearErrors(f);
       showToast('Audit scheduled successfully', 'success');
       fetchAudits();
     } else {
@@ -726,6 +724,13 @@ function submitScheduleAudit(e) {
 
 <?php if ($canRecord): ?>
 function openRecordScoreModal(audit) {
+  const modal = document.getElementById('score-modal');
+  const form = modal.querySelector('form');
+  if (form) {
+    form.reset();
+    clearErrors(form);
+  }
+
   document.getElementById('rs-audit-id').value = audit.AUDIT_ID;
   document.getElementById('rs-score').value = audit.SCORE !== null ? audit.SCORE : '';
 
@@ -739,12 +744,19 @@ function openRecordScoreModal(audit) {
   document.getElementById('rs-findings').value = audit.FINDINGS || '';
   document.getElementById('rs-recommendations').value = audit.RECOMMENDATIONS || '';
 
-  document.getElementById('score-modal').classList.add('open');
+  modal.classList.add('open');
 }
 
 function submitRecordScore(e) {
   e.preventDefault();
   const f = e.target;
+
+  // Use validateForm for score modal form
+  const result = validateForm(f);
+  if (!result.valid) {
+    return;
+  }
+
   const payload = {
     audit_id: parseInt(f.audit_id.value),
     score: parseFloat(f.score.value),
@@ -767,6 +779,7 @@ function submitRecordScore(e) {
     if (res.success) {
       document.getElementById('score-modal').classList.remove('open');
       f.reset();
+      clearErrors(f);
       showToast('Audit score recorded successfully', 'success');
       fetchAudits();
     } else {

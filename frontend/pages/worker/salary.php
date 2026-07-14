@@ -68,6 +68,7 @@ $activePage = 'salary';
   </div>
 
   <script src="../../assets/js/toast.js"></script>
+  <script src="../../assets/js/table-utils.js"></script>
   <script>
     const months = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     function payBadge(v) { return v === 'Paid' ? 'badge-green' : 'badge-amber'; }

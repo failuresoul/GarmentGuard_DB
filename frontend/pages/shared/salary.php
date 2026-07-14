@@ -334,6 +334,7 @@ $canProcess = in_array($role, ['admin', 'compliance_officer']);
 </div>
 
 <script src="../../assets/js/toast.js"></script>
+<script src="../../assets/js/table-utils.js"></script>
 <script>
 const months = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 let salaryRecords = [];
@@ -419,16 +420,13 @@ function fetchSalaryData() {
 // Render filtered records in UI table
 function renderSalariesTable() {
   const factoryId = document.getElementById('factory-filter').value;
-  const search = document.getElementById('search-input').value.toLowerCase().trim();
+  const search = document.getElementById('search-input').value.trim();
 
-  let filtered = salaryRecords;
-
-  if (factoryId) {
-    filtered = filtered.filter(r => String(r.FACTORY_ID) === String(factoryId));
-  }
-  if (search) {
-    filtered = filtered.filter(r => String(r.WORKER_NAME).toLowerCase().includes(search));
-  }
+  // Filter using TableUtils
+  const filtered = TableUtils.filterData(salaryRecords, {
+    FACTORY_ID: factoryId,
+    search: search
+  });
 
   // Update summary cards based on the active filtered dataset
   calculateSummary(filtered);
