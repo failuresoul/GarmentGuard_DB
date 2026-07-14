@@ -7,6 +7,7 @@
   --red: #E24B4A;
   --blue: #378ADD;
   --purple: #534AB7;
+  --teal: #14B8A6;
   
   --bg-primary: #0F172A;
   --bg-secondary: #1E293B;
@@ -563,4 +564,32 @@ a {
   font-size: 48px;
   margin-bottom: 16px;
 }
+
+.badge-teal {
+  background-color: rgba(20, 184, 166, 0.15);
+  color: var(--teal);
+}
+
+/* Sortable headers style */
+.sortable-header {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color var(--transition-speed);
+  position: relative;
+}
+.sortable-header:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+.sort-indicator {
+  margin-left: 6px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+.sortable-header.active {
+  color: var(--green);
+}
+.sortable-header.active .sort-indicator {
+  color: var(--green);
+}
+
 
