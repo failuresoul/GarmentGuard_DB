@@ -2,10 +2,13 @@
 session_start();
 require_once '../config/db.php';
 require_once '../includes/helpers.php';
-authCheck(['admin', 'compliance_officer']);
-header('Content-Type: application/json');
-
 $method = $_SERVER['REQUEST_METHOD'];
+if ($method === 'GET') {
+    authCheck(['admin', 'compliance_officer', 'buyer_user', 'inspector']);
+} else {
+    authCheck(['admin', 'compliance_officer']);
+}
+header('Content-Type: application/json');
 
 // ─── GET ────────────────────────────────────────────────────────────────────
 if ($method === 'GET') {

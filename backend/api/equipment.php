@@ -2,10 +2,13 @@
 session_start();
 require_once '../config/db.php';
 require_once '../includes/helpers.php';
-authCheck(['admin', 'compliance_officer', 'inspector']);
-header('Content-Type: application/json');
-
 $method = $_SERVER['REQUEST_METHOD'];
+if ($method === 'GET') {
+    authCheck(['admin', 'compliance_officer', 'inspector', 'worker']);
+} else {
+    authCheck(['admin', 'compliance_officer', 'inspector']);
+}
+header('Content-Type: application/json');
 
 // ─── GET ────────────────────────────────────────────────────────────────────
 if ($method === 'GET') {
@@ -36,6 +39,10 @@ if ($method === 'GET') {
     if ($expiry_days && $expiry_days !== '' && $expiry_days !== 'All') {
         $sql .= " AND e.expiry_date BETWEEN SYSDATE AND SYSDATE + :days";
         $binds[':days'] = intval($expiry_days);
+    }
+    if ($_SESSION['role'] === 'worker') {
+        $sql .= " AND e.factory_id = :session_fid";
+        $binds[':session_fid'] = intval($_SESSION['factory_id']);
     }
     $sql .= " ORDER BY e.expiry_date ASC, e.equipment_id ASC";
 

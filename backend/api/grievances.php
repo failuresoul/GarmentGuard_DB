@@ -36,6 +36,10 @@ if ($method === 'GET') {
         $sql .= " AND UPPER(g.description) LIKE UPPER('%'||:search||'%')";
         $binds[':search'] = $search;
     }
+    if ($_SESSION['role'] === 'worker') {
+        $sql .= " AND f.factory_id = :session_fid";
+        $binds[':session_fid'] = intval($_SESSION['factory_id']);
+    }
     $sql .= " ORDER BY g.submitted_date DESC";
 
     $rows = fetchRows($conn, $sql, $binds);

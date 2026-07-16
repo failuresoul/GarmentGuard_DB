@@ -3,11 +3,13 @@ session_start();
 require_once '../config/db.php';
 require_once '../includes/helpers.php';
 
-// Auth check: allow admin and compliance_officer
-authCheck(['admin', 'compliance_officer']);
-header('Content-Type: application/json');
-
 $method = $_SERVER['REQUEST_METHOD'];
+if ($method === 'GET') {
+    authCheck(['admin', 'compliance_officer', 'worker']);
+} else {
+    authCheck(['admin', 'compliance_officer']);
+}
+header('Content-Type: application/json');
 
 // ─── GET ───────────────────────────────────────────────────────────────────
 if ($method === 'GET') {
@@ -35,6 +37,10 @@ if ($method === 'GET') {
     if ($payment_status !== null && $payment_status !== '' && $payment_status !== 'All') {
         $sql .= " AND sr.payment_status = :payment_status";
         $binds[':payment_status'] = $payment_status;
+    }
+    if ($_SESSION['role'] === 'worker') {
+        $sql .= " AND w.factory_id = :session_fid";
+        $binds[':session_fid'] = intval($_SESSION['factory_id']);
     }
     $sql .= " ORDER BY sr.year DESC, sr.month DESC, sr.record_id DESC";
 
