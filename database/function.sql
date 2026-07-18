@@ -1,35 +1,31 @@
 CREATE OR REPLACE FUNCTION fn_compliance_score(p_factory_id IN NUMBER)
 RETURN NUMBER AS
+  TYPE t_scores IS TABLE OF NUMBER INDEX BY PLS_INTEGER;
+  v_scores t_scores;
+  v_idx PLS_INTEGER := 1;
   v_score NUMBER := 0;
-  v_count NUMBER := 0;
-  v_s1 NUMBER := 0;
-  v_s2 NUMBER := 0;
-  v_s3 NUMBER := 0;
+  
+  CURSOR c_audits IS 
+    SELECT score FROM AUDIT_RECORD 
+    WHERE factory_id = p_factory_id AND score IS NOT NULL 
+    ORDER BY audit_date DESC;
 BEGIN
-  SELECT COUNT(*) INTO v_count FROM AUDIT_RECORD WHERE factory_id = p_factory_id AND score IS NOT NULL;
-  IF v_count = 0 THEN RETURN 0; END IF;
-  IF v_count >= 1 THEN
-    SELECT score INTO v_s1 FROM (
-      SELECT score, ROW_NUMBER() OVER (ORDER BY audit_date DESC) as rn
-      FROM AUDIT_RECORD WHERE factory_id = p_factory_id AND score IS NOT NULL
-    ) WHERE rn = 1;
+  FOR r_audit IN c_audits LOOP
+    v_scores(v_idx) := r_audit.score;
+    v_idx := v_idx + 1;
+    EXIT WHEN v_idx > 3;
+  END LOOP;
+  
+  IF v_scores.COUNT = 0 THEN 
+    RETURN 0; 
+  ELSIF v_scores.COUNT = 1 THEN 
+    v_score := v_scores(1);
+  ELSIF v_scores.COUNT = 2 THEN 
+    v_score := (v_scores(1) * 0.6) + (v_scores(2) * 0.4);
+  ELSE 
+    v_score := (v_scores(1) * 0.5) + (v_scores(2) * 0.3) + (v_scores(3) * 0.2);
   END IF;
-  IF v_count >= 2 THEN
-    SELECT score INTO v_s2 FROM (
-      SELECT score, ROW_NUMBER() OVER (ORDER BY audit_date DESC) as rn
-      FROM AUDIT_RECORD WHERE factory_id = p_factory_id AND score IS NOT NULL
-    ) WHERE rn = 2;
-  END IF;
-  IF v_count >= 3 THEN
-    SELECT score INTO v_s3 FROM (
-      SELECT score, ROW_NUMBER() OVER (ORDER BY audit_date DESC) as rn
-      FROM AUDIT_RECORD WHERE factory_id = p_factory_id AND score IS NOT NULL
-    ) WHERE rn = 3;
-  END IF;
-  IF v_count = 1 THEN v_score := v_s1;
-  ELSIF v_count = 2 THEN v_score := (v_s1 * 0.6) + (v_s2 * 0.4);
-  ELSE v_score := (v_s1 * 0.5) + (v_s2 * 0.3) + (v_s3 * 0.2);
-  END IF;
+  
   RETURN ROUND(v_score, 2);
 EXCEPTION
   WHEN OTHERS THEN RETURN 0;
@@ -80,16 +76,24 @@ END;
 
 CREATE OR REPLACE FUNCTION fn_equipment_alert(p_factory_id IN NUMBER)
 RETURN VARCHAR2 AS
+  TYPE t_equipment_list IS VARRAY(100) OF VARCHAR2(100);
+  v_equipments t_equipment_list := t_equipment_list();
   v_result VARCHAR2(500) := '';
-  v_count NUMBER := 0;
 BEGIN
-  SELECT COUNT(*) INTO v_count FROM SAFETY_EQUIPMENT
-  WHERE factory_id = p_factory_id AND expiry_date BETWEEN SYSDATE AND SYSDATE + 30;
-  IF v_count = 0 THEN RETURN 'ALL OK'; END IF;
   FOR r IN (SELECT equipment_type FROM SAFETY_EQUIPMENT
             WHERE factory_id = p_factory_id AND expiry_date BETWEEN SYSDATE AND SYSDATE + 30) LOOP
-    v_result := v_result || r.equipment_type || ',';
+    v_equipments.EXTEND;
+    v_equipments(v_equipments.LAST) := r.equipment_type;
   END LOOP;
+  
+  IF v_equipments.COUNT = 0 THEN 
+    RETURN 'ALL OK'; 
+  END IF;
+  
+  FOR i IN 1..v_equipments.COUNT LOOP
+    v_result := v_result || v_equipments(i) || ',';
+  END LOOP;
+  
   RETURN RTRIM(v_result, ',');
 EXCEPTION
   WHEN OTHERS THEN RETURN 'ERROR';

@@ -163,3 +163,45 @@ EXCEPTION
     RAISE;
 END;
 /
+
+CREATE OR REPLACE TYPE factory_report_obj AS OBJECT (
+    factory_name VARCHAR2(100),
+    total_score NUMBER
+);
+/
+
+CREATE OR REPLACE TYPE factory_report_nt IS TABLE OF factory_report_obj;
+/
+
+CREATE OR REPLACE PROCEDURE sp_generate_factory_report AS
+    TYPE worker_rec IS RECORD (
+        w_name VARCHAR2(100),
+        w_factory VARCHAR2(100)
+    );
+    TYPE worker_tbl IS TABLE OF worker_rec INDEX BY PLS_INTEGER;
+    
+    v_workers worker_tbl;
+    v_reports factory_report_nt := factory_report_nt();
+    v_idx PLS_INTEGER := 1;
+    
+    CURSOR cur_factory_workers IS
+        SELECT w.full_name, f.factory_name
+        FROM WORKER w
+        JOIN FACTORY f ON w.factory_id = f.factory_id
+        WHERE w.status = 'Active';
+BEGIN
+    FOR r IN (SELECT factory_name, compliance_score FROM FACTORY WHERE compliance_score > 0) LOOP
+        v_reports.EXTEND;
+        v_reports(v_reports.LAST) := factory_report_obj(r.factory_name, r.compliance_score);
+    END LOOP;
+
+    FOR r IN cur_factory_workers LOOP
+        v_workers(v_idx).w_name := r.full_name;
+        v_workers(v_idx).w_factory := r.factory_name;
+        v_idx := v_idx + 1;
+    END LOOP;
+    
+    DBMS_OUTPUT.PUT_LINE('Total Active Workers Evaluated: ' || (v_idx - 1));
+    DBMS_OUTPUT.PUT_LINE('Total Factories Evaluated: ' || v_reports.COUNT);
+END;
+/
