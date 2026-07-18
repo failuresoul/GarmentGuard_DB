@@ -48,7 +48,7 @@ if ($method === 'GET') {
 
 // ─── POST (Submit grievance) ───────────────────────────────────────────────
 if ($method === 'POST') {
-    authCheck(['compliance_officer', 'worker']);
+    authCheck(['worker']);
     $data = json_decode(file_get_contents('php://input'), true);
 
     $worker_id = $data['worker_id'] ?? null;
@@ -83,6 +83,7 @@ if ($method === 'POST') {
 
 // ─── PATCH (Update status & notes) ──────────────────────────────────────────
 if ($method === 'PATCH') {
+    authCheck(['admin', 'compliance_officer']);
     $data = json_decode(file_get_contents('php://input'), true);
 
     $grievance_id = $data['grievance_id'] ?? null;

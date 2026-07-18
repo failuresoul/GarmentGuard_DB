@@ -8,6 +8,7 @@ header('Content-Type: application/json');
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET') {
+  authCheck(['admin', 'compliance_officer', 'inspector', 'buyer', 'buyer_user']);
   if (isset($_GET['id'])) {
     // Fetch detail of a single factory
     $id = intval($_GET['id']);

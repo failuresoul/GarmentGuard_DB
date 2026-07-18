@@ -46,7 +46,6 @@ if ($role === 'admin') {
         'factories' => ['🏭 Factories',        'factories.php'],
         'audits'    => ['📋 Audits',           'audits.php'],
         'equipment' => ['🧯 Safety Equipment', 'equipment.php'],
-        'reports'   => ['📈 Reports',          'reports.php'],
     ];
 }
 

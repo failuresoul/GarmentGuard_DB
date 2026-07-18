@@ -53,13 +53,11 @@ if ($role === 'admin') {
         'factories' => ['🏭 Factories', 'factories.php'],
         'audits' => ['📋 Audits', 'audits.php'],
         'equipment' => ['🧯 Safety Equipment', 'equipment.php'],
-        'reports' => ['📈 Reports', 'reports.php'],
     ];
 } elseif ($role === 'buyer_user' || $role === 'buyer') {
     $navMenu = [
         'dashboard' => ['📊 Dashboard', 'dashboard.php'],
         'factories' => ['🏭 Factories', 'factories.php'],
-        'audits' => ['📋 Audits', 'audits.php'],
         'certifications' => ['🏅 Certifications', 'certifications.php'],
         'reports' => ['📈 Reports', 'reports.php'],
     ];

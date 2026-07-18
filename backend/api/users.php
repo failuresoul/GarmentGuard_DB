@@ -5,9 +5,9 @@ require_once '../includes/helpers.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 
-// Handle GET: Fetch users (Admin and Compliance Officer allowed)
+// Handle GET: Fetch users (Admin only allowed)
 if ($method === 'GET') {
-  authCheck(['admin', 'compliance_officer']);
+  authCheck(['admin']);
   header('Content-Type: application/json');
 
   $role = $_GET['role'] ?? '';

@@ -1,0 +1,89 @@
+/* Custom Select UI */
+.custom-select-wrapper {
+  position: relative;
+  user-select: none;
+  width: 100%;
+}
+.custom-select {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.custom-select__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+}
+.custom-select__trigger:hover {
+  border-color: rgba(29, 158, 117, 0.5);
+}
+.custom-select.open .custom-select__trigger {
+  border-color: var(--green);
+  box-shadow: 0 0 0 2px rgba(29, 158, 117, 0.2);
+}
+.arrow {
+  width: 10px;
+  height: 10px;
+  border-left: 2px solid var(--text-secondary);
+  border-bottom: 2px solid var(--text-secondary);
+  transform: rotate(-45deg) translateY(-2px);
+  transition: all 0.3s ease;
+  margin-left: 10px;
+}
+.custom-select.open .arrow {
+  transform: rotate(135deg) translateY(0px);
+}
+.custom-options {
+  position: absolute;
+  display: block;
+  top: 100%;
+  left: 0;
+  right: 0;
+  border: 1px solid var(--border-color);
+  border-top: 0;
+  background: var(--bg-secondary);
+  transition: all 0.2s;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  z-index: 1000;
+  margin-top: 4px;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+  overflow-y: auto;
+  max-height: 200px;
+  transform: translateY(-5px);
+}
+.custom-select.open .custom-options {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: all;
+  transform: translateY(0);
+}
+.custom-option {
+  position: relative;
+  display: block;
+  padding: 10px 16px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.custom-option:hover {
+  cursor: pointer;
+  background-color: rgba(29, 158, 117, 0.1);
+  color: var(--text-primary);
+}
+.custom-option.selected {
+  color: var(--text-primary);
+  background-color: rgba(29, 158, 117, 0.15);
+  font-weight: 600;
+}

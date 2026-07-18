@@ -9,6 +9,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 // ─── GET (Fetch audits with filters) ───────────────────────────────────────
 if ($method === 'GET') {
+    authCheck(['admin', 'compliance_officer', 'inspector']);
     $factory_id = $_GET['factory_id'] ?? null;
     $result = $_GET['result'] ?? null;
 
@@ -36,7 +37,7 @@ if ($method === 'GET') {
 
 // ─── POST (Schedule audit) ──────────────────────────────────────────────────
 if ($method === 'POST') {
-    authCheck(['admin', 'compliance_officer']);
+    authCheck(['admin', 'inspector']);
 
     $data = json_decode(file_get_contents('php://input'), true);
 

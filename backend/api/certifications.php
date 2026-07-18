@@ -4,7 +4,7 @@ require_once '../config/db.php';
 require_once '../includes/helpers.php';
 $method = $_SERVER['REQUEST_METHOD'];
 if ($method === 'GET') {
-    authCheck(['admin', 'compliance_officer', 'buyer_user', 'inspector']);
+    authCheck(['admin', 'compliance_officer', 'buyer_user', 'buyer', 'inspector']);
 } else {
     authCheck(['admin', 'compliance_officer']);
 }

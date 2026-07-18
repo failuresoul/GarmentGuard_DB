@@ -46,13 +46,11 @@ if ($role === 'admin') {
         'factories' => ['🏭 Factories',        'factories.php'],
         'audits'    => ['📋 Audits',           'audits.php'],
         'equipment' => ['🧯 Safety Equipment', 'equipment.php'],
-        'reports'   => ['📈 Reports',          'reports.php'],
     ];
 } elseif ($role === 'buyer_user' || $role === 'buyer') {
     $navMenu = [
         'dashboard' => ['📊 Dashboard',       'dashboard.php'],
         'factories' => ['🏭 Factories',        'factories.php'],
-        'audits'    => ['📋 Audits',           'audits.php'],
         'certifications' => ['🏅 Certifications', 'certifications.php'],
         'reports'   => ['📈 Reports',          'reports.php'],
     ];
@@ -67,6 +65,7 @@ $canSubmit = ($role === 'compliance_officer');
   <title>GarmentGuard – Grievance Management</title>
   <meta name="description" content="View worker complaints, manage progress via Kanban board, and log resolutions.">
   <link rel="stylesheet" href="../../assets/css/style.css">
+  <link rel="stylesheet" href="../../assets/css/custom-select.css">
   <style>
     /* Filters and Top Bar */
     .filters-bar {
@@ -315,14 +314,14 @@ $canSubmit = ($role === 'compliance_officer');
       <div class="filters-bar">
         <div class="filter-group">
           <label class="form-label" for="factory-filter">Factory</label>
-          <select class="filter-select" id="factory-filter">
+          <select class="filter-select custom-select-init" id="factory-filter">
             <option value="">All Factories</option>
           </select>
         </div>
 
         <div class="filter-group">
           <label class="form-label" for="category-filter">Category</label>
-          <select class="filter-select" id="category-filter">
+          <select class="filter-select custom-select-init" id="category-filter">
             <option value="All">All Categories</option>
             <option value="Salary">Salary</option>
             <option value="Safety">Safety</option>
@@ -337,7 +336,7 @@ $canSubmit = ($role === 'compliance_officer');
           <input type="text" class="search-input" id="search-input" placeholder="Search grievance description…">
         </div>
 
-        <?php if ($canSubmit): ?>
+        <?php if ($role === 'worker'): ?>
         <div class="filter-group" style="min-width: auto; flex-grow: 0;">
           <button class="btn btn-primary" onclick="openSubmitModal()">📣 Submit Grievance</button>
         </div>
@@ -380,7 +379,7 @@ $canSubmit = ($role === 'compliance_officer');
 <!-- ══════════════════════════════════════════════════
      SUBMIT GRIEVANCE MODAL
      ══════════════════════════════════════════════════ -->
-<?php if ($canSubmit): ?>
+<?php if ($role === 'worker'): ?>
 <div id="submit-modal" class="modal-overlay" onclick="closeModal('submit-modal', event)">
   <div class="modal-box">
     <div class="modal-header">
@@ -391,14 +390,14 @@ $canSubmit = ($role === 'compliance_officer');
       <div class="modal-body">
         <div class="form-group">
           <label class="form-label" for="sg-worker">Worker <span style="color: var(--red)">*</span></label>
-          <select class="form-control" id="sg-worker" name="worker_id" required>
+          <select class="form-control custom-select-init" id="sg-worker" name="worker_id" required>
             <option value="">Select Worker</option>
           </select>
         </div>
 
         <div class="form-group">
           <label class="form-label" for="sg-category">Category <span style="color: var(--red)">*</span></label>
-          <select class="form-control" id="sg-category" name="category" required>
+          <select class="form-control custom-select-init" id="sg-category" name="category" required>
             <option value="Salary">Salary</option>
             <option value="Safety">Safety</option>
             <option value="Harassment">Harassment</option>
@@ -445,7 +444,8 @@ $canSubmit = ($role === 'compliance_officer');
 </div>
 
 <script src="../../assets/js/toast.js"></script>
-  <script src="../../assets/js/table-utils.js"></script>
+<script src="../../assets/js/table-utils.js"></script>
+<script src="../../assets/js/custom-select.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════════════
 //  STATE
@@ -505,6 +505,7 @@ function fetchGrievances() {
       }
       allRows = res.data;
       renderBoard();
+      setTimeout(initCustomSelects, 100);
     })
     .catch(() => showToast('Network error loading grievances', 'error'));
 }
@@ -697,7 +698,7 @@ function submitResolution() {
   }
 }
 
-<?php if ($canSubmit): ?>
+<?php if ($role === 'worker'): ?>
 // ═══════════════════════════════════════════════════════════════
 //  MODAL ACTIONS
 // ═══════════════════════════════════════════════════════════════
@@ -706,10 +707,13 @@ function openSubmitModal() {
   document.getElementById('desc-char-count').textContent = '0 characters (min 20)';
   document.getElementById('desc-char-count').style.color = 'var(--text-secondary)';
   document.getElementById('submit-modal').classList.add('open');
+  setTimeout(initCustomSelects, 100);
 }
 
 function loadWorkersDropdown() {
-  fetch('/backend/api/workers.php')
+  const factoryId = '<?php echo $_SESSION['factory_id'] ?? ''; ?>';
+  const url = factoryId ? `/backend/api/workers.php?factory_id=${factoryId}` : '/backend/api/workers.php';
+  fetch(url)
     .then(r => r.json())
     .then(res => {
       if (res.success) {
@@ -718,9 +722,10 @@ function loadWorkersDropdown() {
         res.data.forEach(w => {
           const opt = document.createElement('option');
           opt.value = w.WORKER_ID;
-          opt.textContent = `${w.FULL_NAME} (${w.FACTORY_NAME})`;
+          opt.textContent = factoryId ? w.FULL_NAME : `${w.FULL_NAME} (${w.FACTORY_NAME})`;
           select.appendChild(opt);
         });
+        initCustomSelects();
       }
     });
 }

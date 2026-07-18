@@ -2,7 +2,7 @@
 session_start();
 require_once '../config/db.php';
 require_once '../includes/helpers.php';
-authCheck();
+authCheck(['admin', 'compliance_officer', 'buyer_user', 'buyer']);
 header('Content-Type: application/json');
 
 $type = $_GET['type'] ?? '';
@@ -48,9 +48,6 @@ if ($type === '') {
 }
 
 // Below are the new API endpoints for the advanced reports charts
-if (!in_array($_SESSION['role'], ['admin', 'compliance_officer'])) {
-    jsonResponse(['success' => false, 'message' => 'Unauthorized']);
-}
 
 $factory_id = $_GET['factory_id'] ?? null;
 $from_date = $_GET['from_date'] ?? null;
