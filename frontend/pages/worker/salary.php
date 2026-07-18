@@ -1,16 +1,21 @@
 <?php
 require_once '../../../backend/includes/auth_check.php';
-if (!isset($_SESSION["role"]) || $_SESSION["role"] !== "worker") { header("Location: /frontend/index.html"); exit; }
+if (!isset($_SESSION["role"]) || $_SESSION["role"] !== "worker") {
+  header("Location: /frontend/index.html");
+  exit;
+}
 $activePage = 'salary';
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GarmentGuard - Salaries</title>
   <link rel="stylesheet" href="../../assets/css/style.css">
 </head>
+
 <body>
   <div class="app-container">
     <div class="sidebar" id="sidebar">
@@ -18,11 +23,15 @@ $activePage = 'salary';
         <span class="brand-title">GarmentGuard</span>
         <span class="brand-subtitle">Compliance System</span>
       </div>
-            <ul class="nav-menu">
-        <li><a href="profile.php" class="nav-link <?php echo $activePage === 'profile' ? 'active' : ''; ?>">👤 Profile</a></li>
-        <li><a href="grievances.php" class="nav-link <?php echo $activePage === 'grievances' ? 'active' : ''; ?>">📣 Grievances</a></li>
-        <li><a href="salary.php" class="nav-link <?php echo $activePage === 'salary' ? 'active' : ''; ?>">💰 Salaries</a></li>
-        <li><a href="equipment.php" class="nav-link <?php echo $activePage === 'equipment' ? 'active' : ''; ?>">🧯 Safety Equipment</a></li>
+      <ul class="nav-menu">
+        <li><a href="profile.php" class="nav-link <?php echo $activePage === 'profile' ? 'active' : ''; ?>">👤
+            Profile</a></li>
+        <li><a href="grievances.php" class="nav-link <?php echo $activePage === 'grievances' ? 'active' : ''; ?>">📣
+            Grievances</a></li>
+        <li><a href="salary.php" class="nav-link <?php echo $activePage === 'salary' ? 'active' : ''; ?>">💰
+            Salaries</a></li>
+        <li><a href="equipment.php" class="nav-link <?php echo $activePage === 'equipment' ? 'active' : ''; ?>">🧯
+            Safety Equipment</a></li>
       </ul>
       <div class="nav-footer">
         <a href="../../../backend/auth/logout.php" class="nav-link">🚪 Logout</a>
@@ -33,7 +42,8 @@ $activePage = 'salary';
       <div class="top-bar">
         <h2 class="page-title">Salary Records</h2>
         <div class="user-profile-menu">
-          <span style="font-weight:500;color:var(--text-secondary);"><?php echo htmlspecialchars($_SESSION['full_name']); ?></span>
+          <span
+            style="font-weight:500;color:var(--text-secondary);"><?php echo htmlspecialchars($_SESSION['full_name']); ?></span>
           <div class="user-avatar"><?php echo strtoupper(substr($_SESSION['full_name'], 0, 1)); ?></div>
         </div>
       </div>
@@ -59,7 +69,9 @@ $activePage = 'salary';
               </tr>
             </thead>
             <tbody id="tbody">
-              <tr><td colspan="10" style="text-align:center;color:var(--text-secondary)">Loading…</td></tr>
+              <tr>
+                <td colspan="10" style="text-align:center;color:var(--text-secondary)">Loading…</td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -70,7 +82,7 @@ $activePage = 'salary';
   <script src="../../assets/js/toast.js"></script>
   <script src="../../assets/js/table-utils.js"></script>
   <script>
-    const months = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const months = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     function payBadge(v) { return v === 'Paid' ? 'badge-green' : 'badge-amber'; }
     function fmt(n) { return '৳ ' + Number(n).toLocaleString(); }
 
@@ -103,7 +115,7 @@ $activePage = 'salary';
       ).join('');
     }
 
-    document.getElementById('search').addEventListener('input', function() {
+    document.getElementById('search').addEventListener('input', function () {
       const q = this.value.toLowerCase();
       render(allRows.filter(r =>
         r.WORKER_NAME.toLowerCase().includes(q) ||
@@ -113,4 +125,5 @@ $activePage = 'salary';
     });
   </script>
 </body>
+
 </html>

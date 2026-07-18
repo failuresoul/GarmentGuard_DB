@@ -71,8 +71,8 @@ if ($role === 'admin') {
         'dashboard' => ['📊 Dashboard', $prefix . 'inspector/dashboard.php'],
         'factories' => ['🏭 Factories', $prefix . 'inspector/factories.php'],
         'audits' => ['📋 Audits', $prefix . 'inspector/audits.php'],
+        'certifications' => ['🏅 Certifications', $prefix . 'inspector/certifications.php'],
         'equipment' => ['🧯 Safety Equipment', $prefix . 'inspector/equipment.php'],
-        'reports' => ['📈 Reports', $prefix . 'inspector/reports.php'],
     ];
 } elseif ($role === 'buyer_user') {
     $navMenu = [

@@ -38,14 +38,14 @@ if ($role === 'admin') {
     ];
 } elseif ($role === 'inspector') {
     $navMenu = [
-        'dashboard'  => ['📊 Dashboard',       'dashboard.php'],
-        'factories'  => ['🏭 Factories',        'factories.php'],
-        'audits'     => ['📋 Audits',           'audits.php'],
-        'equipment'  => ['🧯 Safety Equipment', 'equipment.php'],
+        'dashboard' => ['📊 Dashboard',       'dashboard.php'],
+        'factories' => ['🏭 Factories',        'factories.php'],
+        'audits'    => ['📋 Audits',           'audits.php'],
+        'certifications' => ['🏅 Certifications', 'certifications.php'],
     ];
 }
 
-$canEdit = in_array($role, ['admin', 'compliance_officer', 'inspector']);
+$canEdit = in_array($role, ['admin', 'inspector']);
 ?>
 <!DOCTYPE html>
 <html lang="en">

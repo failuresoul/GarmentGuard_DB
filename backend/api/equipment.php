@@ -6,7 +6,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 if ($method === 'GET') {
     authCheck(['admin', 'compliance_officer', 'inspector', 'worker']);
 } else {
-    authCheck(['admin', 'compliance_officer', 'inspector']);
+    authCheck(['admin', 'inspector']);
 }
 header('Content-Type: application/json');
 

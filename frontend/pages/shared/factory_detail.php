@@ -49,17 +49,19 @@ if ($role === 'admin') {
     ];
 } elseif ($role === 'inspector') {
     $navMenu = [
-        'dashboard' => ['📊 Dashboard', 'dashboard.php'],
-        'factories' => ['🏭 Factories', 'factories.php'],
-        'audits' => ['📋 Audits', 'audits.php'],
+        'dashboard' => ['📊 Dashboard',       'dashboard.php'],
+        'factories' => ['🏭 Factories',        'factories.php'],
+        'audits'    => ['📋 Audits',           'audits.php'],
+        'certifications' => ['🏅 Certifications', 'certifications.php'],
         'equipment' => ['🧯 Safety Equipment', 'equipment.php'],
     ];
 } elseif ($role === 'buyer_user' || $role === 'buyer') {
     $navMenu = [
-        'dashboard' => ['📊 Dashboard', 'dashboard.php'],
-        'factories' => ['🏭 Factories', 'factories.php'],
-        'certifications' => ['🏅 Certifications', 'certifications.php'],
-        'reports' => ['📈 Reports', 'reports.php'],
+        'dashboard'      => ['📊 Dashboard',       'dashboard.php'],
+        'factories'      => ['🏭 Factories',        'factories.php'],
+        'audits'         => ['📋 Audits',           'audits.php'],
+        'certifications' => ['🏅 Certifications',   'certifications.php'],
+        'reports'        => ['📈 Reports',          'reports.php'],
     ];
 }
 ?>

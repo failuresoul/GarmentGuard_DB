@@ -52,11 +52,11 @@ if ($method === 'GET') {
 if ($method === 'POST') {
     $data = json_decode(file_get_contents('php://input'), true);
 
-    $worker_id      = $data['worker_id'] ?? null;
-    $month          = $data['month'] ?? null;
-    $year           = $data['year'] ?? null;
+    $worker_id = $data['worker_id'] ?? null;
+    $month = $data['month'] ?? null;
+    $year = $data['year'] ?? null;
     $overtime_hours = isset($data['overtime_hours']) ? floatval($data['overtime_hours']) : 0;
-    $deductions     = isset($data['deductions']) ? floatval($data['deductions']) : 0;
+    $deductions = isset($data['deductions']) ? floatval($data['deductions']) : 0;
 
     if (!$worker_id || !$month || !$year) {
         jsonResponse(['success' => false, 'message' => 'Missing required fields: worker_id, month, and year are required.'], 400);
@@ -103,7 +103,7 @@ if ($method === 'POST') {
     // Insert Salary Record
     $ins_sql = "INSERT INTO SALARY_RECORD (record_id, worker_id, month, year, base_amount, overtime_hours, overtime_paid, deductions, net_salary, payment_status)
                 VALUES (:rid, :wid, :m, :y, :base, :oth, :otp, :ded, :net, 'Pending')";
-    
+
     $ins_stmt = oci_parse($conn, $ins_sql);
     oci_bind_by_name($ins_stmt, ':rid', $next_id);
     oci_bind_by_name($ins_stmt, ':wid', $worker_id);
@@ -129,7 +129,7 @@ if ($method === 'PATCH') {
     $data = json_decode(file_get_contents('php://input'), true);
 
     $record_id = $data['record_id'] ?? null;
-    $status    = $data['status'] ?? null;
+    $status = $data['status'] ?? null;
 
     if (!$record_id || !$status) {
         jsonResponse(['success' => false, 'message' => 'record_id and status are required'], 400);

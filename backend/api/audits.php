@@ -9,7 +9,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 // ─── GET (Fetch audits with filters) ───────────────────────────────────────
 if ($method === 'GET') {
-    authCheck(['admin', 'compliance_officer', 'inspector']);
+    authCheck(['admin', 'compliance_officer', 'inspector', 'buyer', 'buyer_user']);
     $factory_id = $_GET['factory_id'] ?? null;
     $result = $_GET['result'] ?? null;
 
