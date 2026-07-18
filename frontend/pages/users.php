@@ -365,6 +365,7 @@ $navMenu = [
 
   <script src="/frontend/assets/js/toast.js"></script>
   <script src="/frontend/assets/js/table-utils.js"></script>
+  <script src="/frontend/assets/js/validate.js"></script>
   <script>
     let allUsers = [];
     let allFactories = [];
