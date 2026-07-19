@@ -116,14 +116,24 @@ CREATE OR REPLACE PROCEDURE sp_schedule_audit(
   v_count NUMBER;
 BEGIN
   SELECT COUNT(*) INTO v_count FROM AUDIT_RECORD
-  WHERE factory_id = p_factory_id
-  AND EXTRACT(MONTH FROM audit_date) = EXTRACT(MONTH FROM p_audit_date)
-  AND EXTRACT(YEAR FROM audit_date) = EXTRACT(YEAR FROM p_audit_date);
+  WHERE factory_id = p_factory_id;
+
   IF v_count > 0 THEN
-    RAISE_APPLICATION_ERROR(-20004, 'Audit already scheduled for this factory this month.');
+    -- Update existing record for 1:1 relationship
+    UPDATE AUDIT_RECORD
+    SET inspector_id = p_inspector_id,
+        audit_date = p_audit_date,
+        next_scheduled = p_next_scheduled,
+        result = 'Pending',
+        score = NULL,
+        findings = NULL,
+        recommendations = NULL
+    WHERE factory_id = p_factory_id;
+  ELSE
+    -- Insert new record if none exists
+    INSERT INTO AUDIT_RECORD(audit_id, factory_id, inspector_id, audit_date, next_scheduled, result)
+    VALUES(p_audit_id, p_factory_id, p_inspector_id, p_audit_date, p_next_scheduled, 'Pending');
   END IF;
-  INSERT INTO AUDIT_RECORD(audit_id, factory_id, inspector_id, audit_date, next_scheduled, result)
-  VALUES(p_audit_id, p_factory_id, p_inspector_id, p_audit_date, p_next_scheduled, 'Pending');
   COMMIT;
 EXCEPTION
   WHEN OTHERS THEN

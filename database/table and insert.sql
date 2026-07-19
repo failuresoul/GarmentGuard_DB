@@ -72,7 +72,7 @@ CREATE TABLE USER_ (
 
 CREATE TABLE AUDIT_RECORD (
   audit_id NUMBER PRIMARY KEY,
-  factory_id NUMBER NOT NULL REFERENCES FACTORY(factory_id),
+  factory_id NUMBER NOT NULL UNIQUE REFERENCES FACTORY(factory_id),
   inspector_id NUMBER REFERENCES USER_(user_id) ON DELETE SET NULL,
   audit_date DATE NOT NULL,
   next_scheduled DATE,
